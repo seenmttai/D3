@@ -630,11 +630,13 @@ footer {
 .contact-name {
   font-weight: 600;
   margin-bottom: 0.25rem;
+  color: var(--text);
 }
 
 .contact-email {
   font-size: 0.8rem;
   opacity: 0.8;
+  color: var(--text);
 }
 
 .linkedin-link {
@@ -676,6 +678,18 @@ footer {
   
   section {
     padding: 4rem 1rem;
+  }
+
+  .theme-grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1rem;
+  }
+
+  .theme-card {
+    flex: 0 0 calc(50% - 1rem);
+    max-width: 300px;
   }
 
   .theme-grid {
@@ -773,14 +787,27 @@ footer {
   }
 }
 
+@media (min-width: 769px) {
+  .theme-grid {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+  }
+
+  .theme-card {
+    flex: 0 0 auto;
+    width: 300px;
+  }
+}
+
 @media (min-width: 1200px) {
   .theme-grid {
-    grid-template-columns: repeat(2, 1fr);
+    gap: 3rem;
   }
 }
 
 @media (min-width: 1800px) {
   .theme-grid {
-    grid-template-columns: repeat(4, 1fr);
+    gap: 4rem;
   }
 }
