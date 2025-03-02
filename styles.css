@@ -1,11 +1,13 @@
 @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
 
 :root {
-  --primary: #2A2A2A;
-  --secondary: #4A4A4A;
-  --accent: #00F0FF;
-  --background: #121212;
+  --primary: #1a0933;
+  --secondary: #4e2a73;
+  --accent: #f779b9;
+  --background: #0b041a;
   --text: #FFFFFF;
+  --gradient-1: #3b1369;
+  --gradient-2: #9c36b3;
 }
 
 * {
@@ -21,6 +23,10 @@ html {
 body {
   font-family: 'Space Grotesk', sans-serif;
   background-color: var(--background);
+  background-image: url("/a/c80b809a-f47b-422c-97f2-05a486928a85");
+  background-size: cover;
+  background-attachment: fixed;
+  background-position: center;
   color: var(--text);
   overflow-x: hidden;
 }
@@ -165,6 +171,7 @@ h2 {
   border-radius: 20px;
   width: 400px;
   transition: transform 0.3s ease;
+  border: 1px solid var(--accent);
 }
 
 .level-card:hover {
@@ -195,21 +202,22 @@ h2 {
 }
 
 .theme-card {
-  background: #ffffff;
+  background: rgba(30, 9, 51, 0.8);
   padding: 2rem;
   border-radius: 20px;
   text-align: center;
   transition: transform 0.3s ease;
-  color: var(--primary);
+  color: var(--text);
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
   width: 100%;
   max-width: 100%;
+  border: 1px solid var(--accent);
 }
 
 .theme-card h3 {
-  color: var(--primary);
+  color: var(--accent);
 }
 
 .theme-icon {
@@ -221,7 +229,7 @@ h2 {
 .theme-icon svg {
   width: 100%;
   height: 100%;
-  fill: var(--primary);
+  fill: var(--accent);
 }
 
 .theme-card:hover {
@@ -240,8 +248,9 @@ h2 {
   flex-wrap: wrap;
   margin: 2rem 0;
   padding: 2rem;
-  background: rgba(74, 74, 74, 0.95);
+  background: rgba(45, 15, 78, 0.8);
   border-radius: 20px;
+  border: 1px solid var(--accent);
 }
 
 .logo-item {
@@ -266,16 +275,11 @@ h2 {
 .poster-placeholder {
   width: 100%;
   max-width: 800px;
-  height: 400px;
+  height: auto;
   margin: 0 auto;
-  background: var(--primary);
-  border: 2px dashed var(--accent);
   border-radius: 20px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-size: 1.5rem;
-  color: var(--accent);
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
 }
 
 .problem-statement {
@@ -286,6 +290,7 @@ h2 {
   flex-grow: 1;
   display: flex;
   flex-direction: column;
+  border: 1px solid var(--accent);
 }
 
 .problem-statement h4 {
@@ -307,10 +312,357 @@ h2 {
   flex-grow: 1;
 }
 
+.submission-section {
+  padding: 4rem 0;
+  text-align: center;
+  background: rgba(30, 9, 51, 0.8);
+  border-radius: 20px;
+  max-width: 900px;
+  margin: 4rem auto;
+  border: 1px solid var(--accent);
+}
+
+.submission-section p {
+  margin-bottom: 2rem;
+  font-size: 1.2rem;
+}
+
+.submit-button {
+  display: inline-block;
+  padding: 1rem 2.5rem;
+  background: var(--accent);
+  color: var(--background);
+  text-decoration: none;
+  border-radius: 30px;
+  font-weight: 600;
+  transition: transform 0.3s ease;
+  font-size: 1.1rem;
+  box-shadow: 0 4px 15px rgba(255, 102, 196, 0.3);
+}
+
+.prizes-section {
+  padding: 4rem 0;
+  text-align: center;
+}
+
+.prizes-container {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  margin-top: 2rem;
+  flex-wrap: wrap;
+}
+
+.prize-card {
+  background: var(--primary);
+  border: 1px solid var(--accent);
+  border-radius: 20px;
+  padding: 2rem;
+  width: 300px;
+  text-align: center;
+}
+
+.prize-card h3 {
+  color: var(--accent);
+  margin-bottom: 1rem;
+}
+
+.organizers-section {
+  padding: 4rem 0;
+}
+
+.organizers-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.organizers-container {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  overflow-x: auto;
+  padding: 2rem 0;
+  margin: 0 -1rem;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.organizers-container::-webkit-scrollbar {
+  display: none;
+}
+
+.organizer-card {
+  background: var(--primary);
+  border: 1px solid var(--accent);
+  border-radius: 20px;
+  padding: 1.5rem;
+  min-width: 280px;
+  max-width: 300px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.organizer-image {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  margin: 0 auto 1rem;
+  overflow: hidden;
+  border: 2px solid var(--accent);
+}
+
+.organizer-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.organizer-info h3 {
+  color: var(--accent);
+  margin-bottom: 0.5rem;
+}
+
+.organizer-info p {
+  margin: 0.25rem 0;
+  font-size: 0.9rem;
+}
+
+.faculty-section {
+  padding: 4rem 0;
+  text-align: center;
+}
+
+.faculty-section h2 {
+  color: var(--accent);
+  margin-bottom: 1rem;
+}
+
+.faculty-list {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 2rem;
+}
+
+.faculty-item {
+  max-width: 180px;
+}
+
+.faculty-image {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  margin: 0 auto 1rem;
+  overflow: hidden;
+  border: 2px solid var(--accent);
+}
+
+.faculty-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.faculty-item p {
+  margin: 0.2rem 0;
+  font-size: 0.9rem;
+}
+
+.faculty-item .name {
+  font-weight: bold;
+  color: var(--accent);
+}
+
+.footer-container {
+  background: var(--primary);
+  padding: 3rem 1rem;
+}
+
+.footer-clubs {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 2rem;
+  max-width: 1400px;
+  margin: 0 auto 2rem;
+}
+
+.club-section {
+  padding: 1.5rem;
+  background: rgba(45, 15, 78, 0.5);
+  border-radius: 15px;
+  border: 1px solid var(--accent);
+}
+
+.club-section h3 {
+  color: var(--accent);
+  margin-bottom: 1rem;
+  font-size: 1.2rem;
+  text-align: center;
+}
+
+.club-coordinators {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.coordinator {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 1rem;
+}
+
+.coordinator span {
+  white-space: nowrap;
+}
+
+.coordinator-info {
+  flex-grow: 1;
+}
+
+.coordinator-info p {
+  margin: 0.2rem 0;
+  font-size: 0.85rem;
+}
+
+.coordinator-info .name {
+  font-weight: bold;
+  color: var(--accent);
+}
+
+.coordinator-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.icon-button {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--accent);
+  color: var(--primary);
+  text-decoration: none;
+  font-size: 0.8rem;
+}
+
+.footer-link {
+  color: var(--accent);
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.footer-link:hover {
+  text-decoration: underline;
+}
+
+.copyright {
+  text-align: center;
+  padding-top: 2rem;
+  margin-top: 2rem;
+  border-top: 1px solid rgba(255,255,255,0.1);
+  font-size: 0.9rem;
+}
+
+.copyright a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.heart {
+  color: var(--accent);
+  animation: heartbeat 1.5s infinite;
+  display: inline-block;
+}
+
+@keyframes heartbeat {
+  0% { transform: scale(1); }
+  15% { transform: scale(1.2); }
+  30% { transform: scale(1); }
+  45% { transform: scale(1.2); }
+  60% { transform: scale(1); }
+}
+
 footer {
   text-align: center;
   padding: 2rem;
   background: var(--primary);
+}
+
+.footer-table {
+  width: 100%;
+  margin-bottom: 2rem;
+}
+
+.footer-table table {
+  width: 100%;
+  border-collapse: collapse;
+  color: var(--text);
+}
+
+.footer-table th {
+  padding: 1rem 0.5rem;
+  text-align: center;
+  color: var(--accent);
+  font-weight: 700;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.footer-table td {
+  padding: 1rem 0.5rem;
+  text-align: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 0.9rem;
+}
+
+.footer-table td:first-child {
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.contact-name {
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.contact-email {
+  font-size: 0.8rem;
+  opacity: 0.8;
+}
+
+.linkedin-link {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.linkedin-link:hover {
+  text-decoration: underline;
+}
+
+.footer-links {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.footer-links a {
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 1.1rem;
+  transition: all 0.2s ease;
+}
+
+.footer-links a:hover {
+  transform: translateX(5px);
 }
 
 @media (max-width: 768px) {
@@ -351,6 +703,65 @@ footer {
   .logo-item {
     width: 150px;
     height: 75px;
+  }
+  
+  .prize-card, .organizer-card {
+    width: 100%;
+    min-width: 0;
+  }
+  
+  .footer-clubs {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+  }
+  
+  .club-section h3 {
+    font-size: 1.2rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .coordinator {
+    font-size: 0.9rem;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .coordinator-actions {
+    margin-top: 0.25rem;
+  }
+  
+  .coordinator-actions a {
+    margin-right: 0.2rem;
+  }
+  
+  .faculty-list {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .faculty-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 1.5rem;
+  }
+  
+  .footer-table {
+    font-size: 0.75rem;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .footer-table th, .footer-table td {
+    padding: 0.5rem 0.25rem;
+  }
+  
+  .contact-name {
+    font-size: 0.75rem;
+  }
+  
+  .contact-email {
+    font-size: 0.65rem;
   }
 }
 

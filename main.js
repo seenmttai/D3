@@ -78,7 +78,7 @@ themeCards.forEach(card => {
       duration: 0.3
     });
   });
-  
+
   card.addEventListener('mouseleave', () => {
     gsap.to(card, {
       scale: 1,
@@ -110,7 +110,7 @@ problemStatements.forEach(statement => {
       duration: 0.3
     });
   });
-  
+
   statement.addEventListener('mouseleave', () => {
     gsap.to(statement, {
       scale: 1,
@@ -124,7 +124,7 @@ document.querySelectorAll('nav a').forEach(link => {
     e.preventDefault();
     const target = document.querySelector(link.getAttribute('href'));
     const targetPosition = target.offsetTop;
-    
+
     gsap.to(window, {
       duration: 1,
       scrollTo: {
@@ -147,14 +147,14 @@ for (let i = 0; i < 50; i++) {
   particle.style.background = colors[Math.floor(Math.random() * colors.length)];
   particle.style.borderRadius = '50%';
   graphics.appendChild(particle);
-  
+
   const coords = {
     x: Math.random() * window.innerWidth,
     y: Math.random() * window.innerHeight,
     vx: (Math.random() - 0.5) * 2,
     vy: (Math.random() - 0.5) * 2
   };
-  
+
   particles.push({ element: particle, coords });
 }
 
@@ -162,18 +162,75 @@ function animateParticles() {
   particles.forEach(particle => {
     particle.coords.x += particle.coords.vx;
     particle.coords.y += particle.coords.vy;
-    
+
     if (particle.coords.x < 0 || particle.coords.x > window.innerWidth) {
       particle.coords.vx *= -1;
     }
     if (particle.coords.y < 0 || particle.coords.y > window.innerHeight) {
       particle.coords.vy *= -1;
     }
-    
+
     particle.element.style.transform = `translate(${particle.coords.x}px, ${particle.coords.y}px)`;
   });
-  
+
   requestAnimationFrame(animateParticles);
 }
 
 animateParticles();
+
+const prizeCards = document.querySelectorAll('.prize-card');
+prizeCards.forEach(card => {
+  card.addEventListener('mouseenter', () => {
+    gsap.to(card, {
+      scale: 1.05,
+      duration: 0.3
+    });
+  });
+
+  card.addEventListener('mouseleave', () => {
+    gsap.to(card, {
+      scale: 1,
+      duration: 0.3
+    });
+  });
+});
+
+const organizersContainer = document.querySelector('.organizers-container');
+if (organizersContainer) {
+  const organizerCards = gsap.utils.toArray('.organizer-card');
+  if (organizerCards.length > 3) {
+    gsap.to(organizersContainer, {
+      x: () => -(organizersContainer.scrollWidth - organizersContainer.offsetWidth),
+      ease: "none",
+      scrollTrigger: {
+        trigger: organizersContainer,
+        start: "top center",
+        end: "bottom center",
+        scrub: 1,
+        invalidateOnRefresh: true
+      }
+    });
+  }
+}
+
+gsap.utils.toArray('.coordinator').forEach(coordinator => {
+  gsap.from(coordinator, {
+    opacity: 0,
+    y: 20,
+    stagger: 0.1,
+    duration: 0.5,
+    scrollTrigger: {
+      trigger: coordinator,
+      start: "top 90%",
+      toggleActions: "play none none none"
+    }
+  });
+});
+
+const heart = document.querySelector('.heart');
+gsap.to(heart, {
+  scale: 1.2,
+  duration: 0.5,
+  repeat: -1,
+  yoyo: true
+});
