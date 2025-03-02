@@ -696,18 +696,26 @@ footer {
   }
 
   .logos-container {
-    padding: 1rem;
-    gap: 1rem;
+    padding: 0.5rem;
+    gap: 0.5rem;
   }
 
   .logo-item {
-    width: 150px;
-    height: 75px;
+    width: 120px;
+    height: 60px;
+    margin: 0.25rem;
   }
   
-  .prize-card, .organizer-card {
+  .organizers-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .organizer-card {
     width: 100%;
     min-width: 0;
+    max-width: 100%;
+    padding: 1rem;
   }
   
   .footer-clubs {
