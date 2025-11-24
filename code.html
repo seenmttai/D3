@@ -203,3 +203,87 @@ int main() {
 
     return 0;
 }
+
+
+Here is the cheat sheet for Time Complexity, Space Complexity, and Real-World Applications for all 26 experiments.
+
+**Note on Space Complexity:** For Sorting algorithms, I have listed **Auxiliary Space** (extra space needed besides the input array). For Data Structures (Stacks, Queues, Lists), the space is always **O(n)** because you need to store `n` elements.
+
+---
+
+### **Section 1: Searching**
+
+| Exp | Name | Time Complexity (Worst) | Space Complexity | Why use it? (Application) |
+| :--- | :--- | :--- | :--- | :--- |
+| **1** | **Linear Search** | $O(n)$ | $O(1)$ | Used when data is **unsorted** or the list is very small (e.g., finding a specific shirt in a pile). |
+| **2** | **Binary Search** | $O(\log n)$ | $O(1)$ | Used for **sorted** data. Used in dictionaries, library catalogs, and database indexing. |
+
+---
+
+### **Section 2: Sorting**
+
+| Exp | Name | Time Complexity (Avg/Worst) | Space (Aux) | Why use it? (Application) |
+| :--- | :--- | :--- | :--- | :--- |
+| **3** | **Bubble Sort** | $O(n^2)$ | $O(1)$ | Rarely used in production. Good for teaching and detecting if a list is **already sorted** (Best case $O(n)$). |
+| **4** | **Selection Sort** | $O(n^2)$ | $O(1)$ | Good when **write operations** are expensive (e.g., Flash memory), as it makes the fewest swaps. |
+| **5** | **Insertion Sort** | $O(n^2)$ | $O(1)$ | Excellent for **small arrays** or data that is already **mostly sorted**. Used inside hybrid algorithms (like Timsort in Python). |
+| **6** | **Quick Sort** | $O(n \log n)$ / $O(n^2)$ | $O(\log n)$ | The **fastest** general-purpose sort for arrays in RAM. Used in C++ `std::sort`. |
+| **7** | **Merge Sort** | $O(n \log n)$ | $O(n)$ | Stable sort. Best for **Linked Lists** and sorting huge files that don't fit in RAM (External Sorting). |
+| **23** | **Heap Sort** | $O(n \log n)$ | $O(1)$ | Good for embedded systems with **low memory** (since it's $O(1)$ space). Used in Priority Queues. |
+
+---
+
+### **Section 3: Arrays**
+
+| Exp | Name | Time Complexity | Space | Why use it? (Application) |
+| :--- | :--- | :--- | :--- | :--- |
+| **8** | **Insert Element** | $O(n)$ | $O(1)$ | Adding an item to a list (requires shifting elements to make space). |
+| **9** | **Delete Element** | $O(n)$ | $O(1)$ | Removing an item (requires shifting elements to fill the gap). |
+| **10** | **Merge Arrays** | $O(n + m)$ | $O(n + m)$ | combining two sorted lists into one. This is the core logic step inside **Merge Sort**. |
+
+---
+
+### **Section 4: Stacks & Queues**
+
+| Exp | Name | Time Complexity | Space | Why use it? (Application) |
+| :--- | :--- | :--- | :--- | :--- |
+| **11** | **Stack (Array)** | Push/Pop: $O(1)$ | $O(n)$ | **Undo/Redo** buttons (Ctrl+Z), Browser Back button, Function calls (Recursion). |
+| **12** | **Queue (Array)** | Enq/Deq: $O(1)$ | $O(n)$ | **Printer Spooling** (First doc sent is first printed), CPU Task scheduling. |
+| **13** | **Circular Queue** | Enq/Deq: $O(1)$ | $O(n)$ | **Streaming Buffers** (Netflix loading bar), Traffic light controllers (cycles repeatedly). |
+| **15** | **Stack (Linked List)**| Push/Pop: $O(1)$ | $O(n)$ | Same as Stack (Array), but the size is **dynamic** (doesn't get full). |
+| **16** | **Queue (Linked List)**| Enq/Deq: $O(1)$ | $O(n)$ | Same as Queue (Array), but dynamic size. |
+
+---
+
+### **Section 5: Linked Lists**
+
+| Exp | Name | Time Complexity | Space | Why use it? (Application) |
+| :--- | :--- | :--- | :--- | :--- |
+| **14** | **Linear Linked List** | Search: $O(n)$ <br> Insert: $O(1)$* | $O(n)$ | Dynamic memory allocation. Used when you don't know how much data you will have. |
+| **17** | **Count Items** | $O(n)$ | $O(1)$ | Data analysis (frequency count). |
+| **18** | **Update Items** | $O(n)$ | $O(1)$ | Batch processing (e.g., increasing everyone's salary by 10%). |
+| **19** | **Doubly Linked List** | Search: $O(n)$ <br> Delete: $O(1)$* | $O(n)$ | **Music Players** (Next/Previous song), Browser History (Forward/Back navigation). |
+
+*\*Note: Insert/Delete is $O(1)$ only if you already have the pointer to that location. Finding the location still takes $O(n)$.*
+
+---
+
+### **Section 6: Trees**
+
+| Exp | Name | Time Complexity | Space | Why use it? (Application) |
+| :--- | :--- | :--- | :--- | :--- |
+| **20** | **BST Creation** | Search/Insert: $O(\log n)$ <br> (Worst $O(n)$) | $O(n)$ | **Databases**, File Systems, Autocomplete features. |
+| **21** | **Delete Node** | $O(\log n)$ | $O(n)$ | Removing files or records from a database efficiently. |
+| **22** | **Tree Traversals** | $O(n)$ | $O(n)$ | **Compilers** (parsing code syntax), Mathematical expression evaluation. |
+
+---
+
+### **Section 7: Graphs**
+
+| Exp | Name | Time Complexity | Space | Why use it? (Application) |
+| :--- | :--- | :--- | :--- | :--- |
+| **24** | **BFS / DFS** | $O(V + E)$ | $O(V)$ | **BFS:** Social Networks (finding "Friends of Friends"), GPS (Shortest path). <br> **DFS:** Solving Mazes, Sudoku. |
+| **25** | **Prim's Algorithm** | $O(E \log V)$ | $O(V)$ | **Network Design:** Connecting all computers in a LAN with the least amount of cable. |
+| **26** | **Kruskal's Algorithm**| $O(E \log E)$ | $O(V)$ | **Road Networks:** Connecting cities with minimum cost/road length. |
+
+*Legend: $n$ = number of elements, $V$ = Vertices (nodes), $E$ = Edges (connections).*
