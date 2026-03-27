@@ -1,0 +1,420 @@
+<pre>
+This is a complete transcription of the 14 pages of Java practical notes you provided, in sequential order.
+
+*Note: I have transcribed the text exactly as written in your notes, including minor spelling variations (like "prindln" instead of "println") found in the handwriting.*
+
+---
+
+### Page 1: Experiment - 4(A)
+**AIM:** Write a program to show try-catch blocks.  
+**REQUIREMENT:** JDK Compiler.
+
+**// INPUT**
+```java
+import java.io.*;
+
+class Example {
+    public static void main (String args []) {
+        FileInputStream fis = null;
+        try {
+            fis = new FileInputStream ("B:/my file.txt");
+        }
+        catch (FileNotFoundException fnfe) {
+            System.out.println("The specified file is not" 
+                + " present at the given path");
+        }
+        int k;
+        try {
+            while ((k = fis.read()) != -1) {
+                System.out.print ((char) k);
+            }
+            fis.close ();
+        }
+        catch (IOException ioe) {
+            System.out.println ("I/O error occured: " + ioe);
+        }
+    }
+}
+```
+**// OUTPUT**  
+This program will display the file contents.
+
+---
+
+### Page 2: Experiment - 4(B)
+**AIM:** Write a program to show the usage of throw keyword.  
+**REQUIREMENT:** JDK Compiler.
+
+**// INPUT**
+```java
+public class Main {
+    public static void main (String args []) {
+        try {
+            int a = new int [10];
+            throw new ArrayIndexOutOfBoundsException ("Exception Thrown");
+        }
+        catch (ArrayIndexOutOfBoundsException e) {
+            System.out.println (e);
+            System.out.println ("Exception caught");
+        }
+    }
+}
+```
+**// OUTPUT**  
+java.lang.ArrayIndexOutOfBoundsException: Exception Thrown  
+Exception Caught
+
+---
+
+### Page 3: Experiment - 5(a)
+**AIM:** Write a program to implement a custom exception.  
+**REQUIREMENT:** JDK Compiler.  
+**THEORY:** A custom exception is a user-defined exception created by extending the exception class. It is used to handle application specific errors.
+
+**// INPUT**
+```java
+class InvalidAgeException extends Exception {
+    InvalidAgeException (String s) {
+        super(s);
+    }
+}
+
+class TestCustomException1 {
+    static void validate (int age) throws InvalidAgeException {
+        if (age < 18)
+            throw new InvalidAgeException ("not valid");
+        else
+            System.out.println ("Welcome to vote");
+    }
+
+    public static void main (String args []) {
+        try {
+            validate (13);
+        }
+        catch (Exception m) {
+            System.out.println ("Exception occured: " + m);
+        }
+        System.out.println ("rest of the code...");
+    }
+}
+```
+**// OUTPUT**  
+Exception occured: InvalidAgeException: not valid  
+rest of the code...
+
+---
+
+### Page 4: Experiment - 6(a)
+**AIM:** Write a program to create a thread by extending the thread class.  
+**REQUIREMENT:** JDK Compiler.  
+**THEORY:** A thread can be created in java by extending the thread class and overriding the run() method. The thread starts executing when start() is called.
+
+**Code:**
+```java
+class MyThread extends Thread {
+    public void run () {
+        System.out.println ("Thread is running using Thread class");
+    }
+
+    public static void main (String [] args) {
+        MyThread t = new MyThread ();
+        t.start ();
+    }
+}
+```
+**// Output**  
+Thread is running using Thread class
+
+---
+
+### Page 5: Experiment - 5(c)
+**AIM:** Write a program to demonstrate the usage of throw keyword.  
+**REQUIREMENT:** JDK Compiler.  
+**THEORY:** The throw keyword is used to explicitly throw an exception in a program. It is mainly used to throw custom or predefined exception.
+
+**Code:**
+```java
+class ThrowDemo {
+    static void checkAge (int age) {
+        if (age < 18) {
+            throw new ArithmeticException ("Not eligible to vote");
+        }
+        else {
+            System.out.println ("Eligible to vote");
+        }
+    }
+
+    public static void main (String [] args) {
+        checkAge (15);
+    }
+}
+```
+**// Output**  
+Exception in thread "main" java.lang.ArithmeticException: Not eligible to vote
+
+---
+
+### Page 6: Experiment - 6(c)
+**AIM:** Write a program to create multiple threads.  
+**REQUIREMENT:** JDK Compiler.  
+**THEORY:** Multiple threads can run concurrently in java, allowing better CPU utilization & multitasking.
+
+**Code:**
+```java
+class Multithread extends Thread {
+    public void run () {
+        System.out.println ("Thread running: " + Thread.currentThread().getName());
+    }
+
+    public static void main (String [] args) {
+        Multithread t1 = new Multithread ();
+        Multithread t2 = new Multithread ();
+        Multithread t3 = new Multithread ();
+
+        t1.start ();
+        t2.start ();
+        t3.start ();
+    }
+}
+```
+**// Output**  
+Thread running: Thread-0  
+Thread running: Thread-1  
+Thread running: Thread-2
+
+---
+
+### Page 7: Experiment - 5(b)
+**AIM:** Write a program to demonstrate nested try blocks.  
+**REQUIREMENT:** JDK Compiler.  
+**THEORY:** A nested try block means a try block inside another try block. It is used when different parts of code may throw different exceptions.
+
+**Code:**
+```java
+class NestedTryDemo {
+    public static void main (String [] args) {
+        try {
+            int a = 10 / 2;
+            try {
+                int [] arr = {1, 2, 3};
+                System.out.println (arr[5]);
+            }
+            catch (ArrayIndexOutOfBoundsException e) {
+                System.out.println ("Inner catch: Array index error");
+            }
+        }
+        catch (ArithmeticException e) {
+            System.out.println ("Outer catch: Arithmetic error");
+        }
+        System.out.println ("Program continues normally");
+    }
+}
+```
+**// Output**  
+Inner catch: Array index error  
+Program continues normally
+
+---
+
+### Page 8: Experiment - 6(b)
+**AIM:** Write a program to create thread by implementing the Runnable interface.  
+**REQUIREMENT:** JDK Compiler.  
+**THEORY:** The Runnable interface contains run() method. A thread object is created by passing the Runnable object to the Thread construction.
+
+**Code:**
+```java
+class MyRunnable implements Runnable {
+    public void run () {
+        System.out.println ("Thread is running using Runnable interface");
+    }
+
+    public static void main (String [] args) {
+        MyRunnable obj = new MyRunnable ();
+        Thread t = new Thread (obj);
+        t.start ();
+    }
+}
+```
+**// Output**  
+Thread is running using Runnable interface.
+
+---
+
+### Page 9: Experiment - 4(C)
+**AIM:** Write a program to implement user-defined exception.  
+**REQUIREMENT:** JDK Compiler.
+
+**// INPUT**
+```java
+class InvalidProductException extends Exception {
+    public InvalidProductException (String s) {
+        super(s);
+    }
+}
+
+public class Example 1 {
+    void productcheck (int weight) throws InvalidProductException {
+        if (weight < 100) {
+            throw new InvalidProductException ("Product Invalid");
+        }
+    }
+
+    public static void main (String args []) {
+        Example 1 obj = new Example 1 ();
+        try {
+            obj.productcheck (60);
+        }
+        catch (InvalidProductException ex) {
+            System.out.println ("Caught the exception");
+            System.out.println (ex.getMessage ());
+        }
+    }
+}
+```
+**// OUTPUT**  
+Caught the exception  
+Product Invalid
+
+---
+
+### Page 10: Experiment - 3(c)
+**AIM:** Write a program to include a class in Java package.  
+**REQUIREMENT:** JDK Compiler.
+
+**// INPUT**
+```java
+package MyPackage;
+
+public class Compare {
+    int num1, num2;
+    Compare (int n, int m) {
+        num1 = n;
+        num2 = m;
+    }
+    public void getmax () {
+        if (num1 > num2) {
+            System.out.println ("Max value of 2 numbers is " + num1);
+        }
+        else {
+            System.out.println ("Max value of 2 numbers is " + num2);
+        }
+    }
+
+    public static void main (String args []) {
+        Compare current [] = new Compare [3];
+        current [1] = new Compare (5, 10);
+        current [2] = new Compare (123, 120);
+        for (int i = 1; i < 3; i++) {
+            current [i].getmax ();
+        }
+    }
+}
+```
+**// OUTPUT**  
+Max value of 2 numbers is 10  
+Max value of 2 numbers is 123
+
+---
+
+### Page 11 (PDF Page 1): Experiment No - 9(a)
+**Aim:** To create a generic method that can accept and display values at different types of data.  
+**Requirement:** JDK Compiler.
+
+**// Program 1**
+```java
+class GenericClass <T> {
+    T data;
+    GenericClass (T data) {
+        this.data = data;
+    }
+    void display () {
+        System.out.println ("Data: " + data);
+    }
+}
+
+public class TestGeneric {
+    public static void main (String args []) {
+        GenericClass <Integer> obj1 = new GenericClass <>(10);
+        GenericClass <String> obj2 = new GenericClass <>("Hello Java");
+
+        obj1.display ();
+        obj2.display ();
+    }
+}
+```
+
+---
+
+### Page 12 (PDF Page 2): Experiment No - 9(b)
+**Aim:** To create a generic method that can accept and display values at different data types.  
+**Requirement:** JDK Compiler.
+
+**// Program 2**
+```java
+class GenericMethod {
+    public static <T> void printData (T data) {
+        System.out.println ("Data : " + data);
+    }
+
+    public static void main (String args []) {
+        printData (25);
+        printData ("Generic Example");
+        printData (3.14);
+    }
+}
+```
+
+---
+
+### Page 13 (PDF Page 3): Experiment No - 10(a)
+**Aim:** Program to create generic classes with multiple parameters.  
+**Requirement:** JDK Compiler.
+
+**// Program 1**
+```java
+class GenericClass <T, U> {
+    T value1;
+    U value2;
+    GenericClass (T v1, U v2) {
+        value1 = v1;
+        value2 = v2;
+    }
+    void display () {
+        System.out.println ("First Value : " + value1);
+        System.out.println ("Second value : " + value2);
+    }
+}
+
+class GenericDemo {
+    public static void main (String [] args) {
+        GenericClass <Integer, String> obj1 = new GenericClass <>(10, "Java");
+        GenericClass <Double, Character> obj2 = new GenericClass <>(25.5, 'A');
+
+        obj1.display ();
+        System.out.println ();
+        obj2.display ();
+    }
+}
+```
+
+---
+
+### Page 14 (PDF Page 4): Experiment No - 10(b)
+**Aim:** To write a program demonstrating a generic method.  
+**Requirement:** JDK Compiler.
+
+**// Program 2**
+```java
+class GenericMethodDemo {
+    public static <T> void display (T value) {
+        System.out.println ("Value: " + value);
+    }
+
+    public static void main (String [] args) {
+        display (10);
+        display ("Java");
+        display (5.5);
+    }
+}
+```
+</pre>
