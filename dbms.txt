@@ -1,0 +1,2185 @@
+DBMS LAB (CSE201): ALL EXPERIMENTS WITH CODE AND OUTPUT
+Amity School of Engineering & Technology, B.Tech CSE. Lab software: MySQL (the practical file uses MySQL 5.1).
+
+How this file is organised (by experiment name and number):
+PART A  Lab file experiments: Exp 1 basic queries, Exp 2 AND/OR/NOT/wildcards/ORDER BY, Exp 3 DDL and constraints.
+PART B  Practical file (EMP / DEPT tables): Exp P1 to P12, one per SQL command, with the file's task numbers 1-55.
+PART C  Official syllabus lab list (Employee & Department tables): Lab 1 to Lab 13.
+PART D  Lab Assignment 1: Q1 Course/Student, Q2 Supplier-Parts-Projects, Q3 Employee queries.
+Outputs were produced by actually running each query on the data shown and are printed the way the MySQL
+console prints them. Where the original file has a mistake, the corrected query is given and the slip is noted.
+Viva questions for every experiment are in dbmsv.txt.
+
+================================================================================================
+GETTING STARTED IN THE MYSQL CONSOLE
+================================================================================================
+C:\> mysql -u root -p
+Enter password: ****
+mysql> CREATE DATABASE company;
+Query OK, 1 row affected (0.00 sec)
+
+mysql> USE company;
+Database changed
+
+mysql> SHOW TABLES;            -- list tables
+mysql> DESC EMP;               -- columns of a table
+mysql> SHOW CREATE TABLE EMP;  -- full definition incl. ENGINE and constraints
+mysql> SELECT VERSION();       -- server version
+NOTE: If you CREATE TABLE before USE, MySQL says ERROR 1046 (3D000): No database selected
+      (this happened in the practical file).
+NOTE: A statement only runs after the ; . If the prompt shows -> you forgot it: type ; and
+      Enter. \c cancels a half-typed statement.
+
+================================================================================================
+PART A: LAB FILE EXPERIMENTS
+================================================================================================
+
+------------------------------------------------------------------------------------------------
+EXPERIMENT 1: PRACTICE BASIC SQL QUERIES
+------------------------------------------------------------------------------------------------
+AIM: Practice basic SQL queries.
+TOOLS: w3schools SQL editor (MySQL syntax).
+TABLES: Customers(CustomerID, CustomerName, ContactName, Address, City, PostalCode, Country), 91 rows;
+        Products(ProductID, ProductName, SupplierID, CategoryID, Unit, Price), 77 rows.
+
+1.1  Display the records from the table.
+mysql> SELECT * FROM Customers;
+Result: All 91 customers, all 7 columns.
+
+1.2  Find customer details of Mexico citizens.
+mysql> SELECT * FROM Customers WHERE Country = 'Mexico';
+Result: Only the rows whose Country is Mexico.
+
+1.3  Update a record of your choice.
+mysql> UPDATE Customers SET ContactName = 'Juan' WHERE Country = 'Mexico';
+Result: Every Mexican customer's ContactName becomes Juan (MySQL reports how many rows changed). Without WHERE, every row would change.
+
+1.4  List customers from Spain whose names start with G.
+mysql> SELECT * FROM Customers WHERE Country = 'Spain' AND CustomerName LIKE 'G%';
+Result: Both conditions must hold. 'G%' = starts with G.
+
+1.5  Find customers who are NOT from Spain.
+mysql> SELECT * FROM Customers WHERE NOT Country = 'Spain';
+Result: Same as WHERE Country <> 'Spain'.
+
+1.6  Find the minimum Price of products.
+mysql> SELECT MIN(Price) FROM Products;
+Result: Output: 2.5 (Geitost).
+
+1.7  Find the maximum Price of products.
+mysql> SELECT MAX(Price) FROM Products;
+Result: Output: 263.5 (Cote de Blaye).
+
+1.8  Display the total number of records.
+mysql> SELECT COUNT(*) FROM Customers;
+Result: Output: 91.
+
+1.9  Find the number of customers from each country.
+mysql> SELECT COUNT(CustomerID), Country FROM Customers GROUP BY Country;
+Result: One row per country with its customer count.
+
+------------------------------------------------------------------------------------------------
+EXPERIMENT 2: PRACTICE AND, OR, NOT, WILDCARDS AND ORDER BY
+------------------------------------------------------------------------------------------------
+AIM: Practice AND, OR, NOT, wildcards (LIKE with % and _) and ORDER BY.
+TOOLS: w3schools SQL editor (MySQL syntax). TABLE: Customers.
+Wildcards: % = any number of characters (even none), _ = exactly one character.
+
+2.1  Retrieve all customers from Germany OR France.
+mysql> SELECT CustomerName FROM Customers WHERE Country = 'Germany' OR Country = 'France';
+
+2.2  Find customers from the USA with City 'New York'.
+mysql> SELECT CustomerName FROM Customers WHERE Country = 'USA' AND City = 'New York';
+NOTE: The w3schools table has no customer in New York, so this gives an empty set. The query
+      itself is right.
+
+2.3  Customers NOT from the UK with CustomerID greater than 50.
+mysql> SELECT CustomerName FROM Customers WHERE NOT Country = 'UK' AND CustomerID > 50;
+NOTE: NOT applies only to Country = 'UK' (NOT binds tighter than AND).
+
+2.4  Customers from Canada OR Mexico whose ContactName starts with 'A'.
+mysql> SELECT CustomerName FROM Customers WHERE (Country = 'Canada' OR Country = 'Mexico') AND ContactName LIKE 'A%';
+NOTE: The file wrote this WITHOUT brackets. AND runs before OR, so the file's version returns
+      ALL Canadian customers plus Mexicans whose contact starts with A. The brackets give the
+      intended meaning. Same as: WHERE Country IN ('Canada','Mexico') AND ContactName LIKE
+      'A%'.
+
+2.5  Customers NOT from Spain AND NOT from Italy.
+mysql> SELECT CustomerName FROM Customers WHERE NOT Country = 'Spain' AND NOT Country = 'Italy';
+NOTE: Same as WHERE Country NOT IN ('Spain','Italy').
+
+2.6  CustomerName starts with 'A'.
+mysql> SELECT CustomerName FROM Customers WHERE CustomerName LIKE 'A%';
+
+2.7  CustomerName ends with 's'.
+mysql> SELECT CustomerName FROM Customers WHERE CustomerName LIKE '%s';
+
+2.8  City contains 'on'.
+mysql> SELECT CustomerName FROM Customers WHERE City LIKE '%on%';
+
+2.9  ContactName has 'r' as the second letter.
+mysql> SELECT CustomerName FROM Customers WHERE ContactName LIKE '_r%';
+
+2.10  CustomerName starts with 'B' and is at least 3 characters long.
+mysql> SELECT CustomerName FROM Customers WHERE CustomerName LIKE 'B__%';
+NOTE: B + two underscores + %: at least 3 characters.
+
+2.11  Country starts with 'G' and ends with 'y'.
+mysql> SELECT CustomerName FROM Customers WHERE Country LIKE 'G%y';
+
+2.12  Address contains 'Str.' and City starts with 'B'.
+mysql> SELECT CustomerName FROM Customers WHERE Address LIKE '%Str.%' AND City LIKE 'B%';
+NOTE: The file used '%Str%' (without the dot), which also matches e.g. 'Strasse'.
+
+2.13  CustomerName starts with 'M' or 'A'.
+mysql> SELECT CustomerName FROM Customers WHERE CustomerName LIKE 'M%' OR CustomerName LIKE 'A%';
+
+2.14  Names starting with 'A' from Germany, sorted by CustomerName.
+mysql> SELECT CustomerName FROM Customers WHERE CustomerName LIKE 'A%' AND Country = 'Germany' ORDER BY CustomerName;
+
+2.15  ContactName contains 'an', ordered by Country descending.
+mysql> SELECT CustomerName FROM Customers WHERE ContactName LIKE '%an%' ORDER BY Country DESC;
+
+2.16  Customers from Mexico or Brazil, sorted by City then CustomerName.
+mysql> SELECT CustomerName FROM Customers WHERE Country = 'Mexico' OR Country = 'Brazil' ORDER BY City, CustomerName;
+
+2.17  CustomerName NOT starting with 'B', sorted by Country then City.
+mysql> SELECT CustomerName FROM Customers WHERE CustomerName NOT LIKE 'B%' ORDER BY Country, City;
+NOTE: The file wrote WHERE NOT CustomerName LIKE 'B%', which is the same.
+
+2.18  PostalCode with '1' as the second character, ordered by PostalCode.
+mysql> SELECT CustomerName FROM Customers WHERE PostalCode LIKE '_1%' ORDER BY PostalCode;
+NOTE: Strings: the file uses double quotes ("Germany"). MySQL accepts them by default, but
+      single quotes ('Germany') are standard SQL and also work in Oracle. Use single quotes in
+      the exam.
+
+------------------------------------------------------------------------------------------------
+EXPERIMENT 3: PRACTICE DDL COMMANDS AND CONSTRAINTS
+------------------------------------------------------------------------------------------------
+AIM: Practice DDL commands (CREATE, ALTER, DROP) and constraints (PRIMARY KEY, NOT NULL, UNIQUE, CHECK,
+FOREIGN KEY, DEFAULT).  TOOLS: MySQL.
+NOTE: MySQL 5.1 (the lab's version) uses the MyISAM engine by default, which ignores FOREIGN
+      KEY constraints. Add ENGINE=InnoDB to every CREATE TABLE that has or is referenced by a
+      foreign key. MySQL before 8.0.16 also accepts CHECK but does not enforce it.
+
+3.1  Create a table Student: StudentID (Primary Key), Name (Not Null), Email (Unique), Age (Check Age > 0).
+mysql> CREATE TABLE Student (
+    ->   StudentID INT PRIMARY KEY,
+    ->   Name VARCHAR(50) NOT NULL,
+    ->   Email VARCHAR(50) UNIQUE,
+    ->   Age INT CHECK (Age > 0)
+    -> ) ENGINE=InnoDB;
+Query OK, 0 rows affected (0.01 sec)
+
+mysql> DESC Student;
++-----------+-------------+------+-----+---------+-------+
+| Field     | Type        | Null | Key | Default | Extra |
++-----------+-------------+------+-----+---------+-------+
+| StudentID | int(11)     | NO   | PRI | NULL    |       |
+| Name      | varchar(50) | NO   |     | NULL    |       |
+| Email     | varchar(50) | YES  | UNI | NULL    |       |
+| Age       | int(11)     | YES  |     | NULL    |       |
++-----------+-------------+------+-----+---------+-------+
+4 rows in set (0.00 sec)
+
+3.2  Create a table Course: CourseID (Primary Key), CourseName, Credits (Check between 1 and 6).
+mysql> CREATE TABLE Course (
+    ->   CourseID INT PRIMARY KEY,
+    ->   CourseName VARCHAR(50),
+    ->   Credits INT CHECK (Credits BETWEEN 1 AND 6)
+    -> ) ENGINE=InnoDB;
+Query OK, 0 rows affected (0.01 sec)
+
+mysql> DESC Course;
++------------+-------------+------+-----+---------+-------+
+| Field      | Type        | Null | Key | Default | Extra |
++------------+-------------+------+-----+---------+-------+
+| CourseID   | int(11)     | NO   | PRI | NULL    |       |
+| CourseName | varchar(50) | YES  |     | NULL    |       |
+| Credits    | int(11)     | YES  |     | NULL    |       |
++------------+-------------+------+-----+---------+-------+
+3 rows in set (0.00 sec)
+
+3.3  Create a table Department: DeptID (Primary Key), DeptName (Unique, Not Null).
+mysql> CREATE TABLE Department (
+    ->   DeptID INT PRIMARY KEY,
+    ->   DeptName VARCHAR(50) UNIQUE NOT NULL
+    -> ) ENGINE=InnoDB;
+Query OK, 0 rows affected (0.01 sec)
+
+mysql> DESC Department;
++----------+-------------+------+-----+---------+-------+
+| Field    | Type        | Null | Key | Default | Extra |
++----------+-------------+------+-----+---------+-------+
+| DeptID   | int(11)     | NO   | PRI | NULL    |       |
+| DeptName | varchar(50) | NO   | UNI | NULL    |       |
++----------+-------------+------+-----+---------+-------+
+2 rows in set (0.00 sec)
+NOTE: The file's screenshot names this column DepName (typo). Its later ALTER on DeptName
+      would then fail with ERROR 1054 (Unknown column).
+
+3.4  Create a table Employee with a foreign key referencing Department: EmpID (Primary Key), EmpName, DeptID (Foreign Key).
+mysql> CREATE TABLE Employee (
+    ->   EmpID INT PRIMARY KEY,
+    ->   EmpName VARCHAR(50),
+    ->   DeptID INT,
+    ->   FOREIGN KEY (DeptID) REFERENCES Department(DeptID)
+    -> ) ENGINE=InnoDB;
+Query OK, 0 rows affected (0.01 sec)
+
+mysql> DESC Employee;
++---------+-------------+------+-----+---------+-------+
+| Field   | Type        | Null | Key | Default | Extra |
++---------+-------------+------+-----+---------+-------+
+| EmpID   | int(11)     | NO   | PRI | NULL    |       |
+| EmpName | varchar(50) | YES  |     | NULL    |       |
+| DeptID  | int(11)     | YES  | MUL | NULL    |       |
++---------+-------------+------+-----+---------+-------+
+3 rows in set (0.00 sec)
+NOTE: Write the separate FOREIGN KEY (...) REFERENCES ... clause. A column-level 'DeptID INT
+      REFERENCES Department(DeptID)' is accepted by MySQL but silently creates no foreign key.
+      Key 'MUL' = a non-unique index (MySQL creates one for the FK).
+
+3.5  Create a table Enrollment to link Student and Course: composite Primary Key (StudentID, CourseID), foreign keys to Student and Course.
+mysql> CREATE TABLE Enrollment (
+    ->   StudentID INT,
+    ->   CourseID INT,
+    ->   PRIMARY KEY (StudentID, CourseID),
+    ->   FOREIGN KEY (StudentID) REFERENCES Student(StudentID),
+    ->   FOREIGN KEY (CourseID) REFERENCES Course(CourseID)
+    -> ) ENGINE=InnoDB;
+Query OK, 0 rows affected (0.01 sec)
+
+mysql> DESC Enrollment;
++-----------+---------+------+-----+---------+-------+
+| Field     | Type    | Null | Key | Default | Extra |
++-----------+---------+------+-----+---------+-------+
+| StudentID | int(11) | NO   | PRI | 0       |       |
+| CourseID  | int(11) | NO   | PRI | 0       |       |
++-----------+---------+------+-----+---------+-------+
+2 rows in set (0.00 sec)
+
+3.6  Add a column Gender VARCHAR(10) to Student allowing only 'Male', 'Female', 'Other'.
+mysql> ALTER TABLE Student ADD Gender VARCHAR(10)
+    ->   CHECK (Gender IN ('Male', 'Female', 'Other'));
+Query OK, 0 rows affected (0.01 sec)
+NOTE: Existing rows get Gender = NULL.
+
+3.7  Modify the Credits column in the Course table to make it NOT NULL.
+mysql> ALTER TABLE Course MODIFY Credits INT NOT NULL;
+Query OK, 0 rows affected (0.01 sec)
+NOTE: MODIFY re-states the whole column definition (type + constraints). If any existing row
+      has Credits NULL, fix it first or the ALTER fails.
+
+3.8  Rename the column EmpName in the Employee table to EmployeeName.
+mysql> ALTER TABLE Employee CHANGE EmpName EmployeeName VARCHAR(50);
+Query OK, 0 rows affected (0.01 sec)
+NOTE: MySQL 5.x has no RENAME COLUMN; CHANGE old new TYPE renames and re-states the type.
+      MySQL 8 also accepts: ALTER TABLE Employee RENAME COLUMN EmpName TO EmployeeName;
+
+3.9  Drop the Age column from the Student table.
+mysql> ALTER TABLE Student DROP COLUMN Age;
+Query OK, 0 rows affected (0.01 sec)
+
+3.10  Add a DEFAULT value of 'General' to the DeptName column in the Department table.
+mysql> ALTER TABLE Department ALTER DeptName SET DEFAULT 'General';
+Query OK, 0 rows affected (0.01 sec)
+NOTE: ALTER [COLUMN] col SET DEFAULT v changes only the default; DROP DEFAULT removes it.
+      Existing rows are not changed.
+
+3.11  Testing the constraints (what MySQL 8 / InnoDB does):
+mysql> INSERT INTO Student VALUES (1, 'Aman', 'aman@uni.in', 20);
+Query OK, 1 row affected (0.00 sec)
+
+mysql> INSERT INTO Student VALUES (1, 'Riya', 'riya@uni.in', 19);
+ERROR 1062 (23000): Duplicate entry '1' for key 'PRIMARY'
+
+mysql> INSERT INTO Student VALUES (2, NULL, 'x@uni.in', 19);
+ERROR 1048 (23000): Column 'Name' cannot be null
+
+mysql> INSERT INTO Student VALUES (3, 'Kabir', 'aman@uni.in', 19);
+ERROR 1062 (23000): Duplicate entry 'aman@uni.in' for key 'Email'
+
+mysql> INSERT INTO Student VALUES (4, 'Zoya', 'z@uni.in', 0);
+ERROR 3819 (HY000): Check constraint 'student_chk_1' is violated.      (MySQL 8.0.16+; MySQL 5.1 accepts it)
+
+mysql> INSERT INTO Employee VALUES (1, 'Mehta', 99);
+ERROR 1452 (23000): Cannot add or update a child row: a foreign key constraint fails (...)
+
+================================================================================================
+PART B: PRACTICAL FILE (EMP / DEPT TABLES, MYSQL 5.1)
+================================================================================================
+The practical file builds an EMP table in database 'company' and runs 55 numbered tasks. Its index lists 12
+commands; each is one experiment below (P1 to P12). The numbers in square brackets are the file's task numbers.
+All outputs below come from running the tasks in the file's order, so each table shows the data as it was at
+that point (for example, JOB is empty until task 37 adds it).
+NOTE: The file inserts the name as 'RIDHMIMA' (typo) and uses the same spelling in its
+      UPDATEs. It is spelled RIDHIMA here.
+
+------------------------------------------------------------------------------------------------
+EXPERIMENT P1: CREATE TABLE COMMAND
+------------------------------------------------------------------------------------------------
+AIM: To create tables EMP and DEPT.
+
+[1]  To create table EMP.
+mysql> CREATE DATABASE company;
+Query OK, 1 row affected (0.00 sec)
+
+mysql> USE company;
+Database changed
+
+mysql> CREATE TABLE EMP (EMPNO INT, ENAME CHAR(20), SAL INT, DEPTNO INT);
+Query OK, 0 rows affected (0.00 sec)
+
+mysql> DESC EMP;
++--------+----------+------+-----+---------+-------+
+| Field  | Type     | Null | Key | Default | Extra |
++--------+----------+------+-----+---------+-------+
+| EMPNO  | int(11)  | YES  |     | NULL    |       |
+| ENAME  | char(20) | YES  |     | NULL    |       |
+| SAL    | int(11)  | YES  |     | NULL    |       |
+| DEPTNO | int(11)  | YES  |     | NULL    |       |
++--------+----------+------+-----+---------+-------+
+4 rows in set (0.00 sec)
+NOTE: Creating the database is not enough: USE company; must come before CREATE TABLE,
+      otherwise ERROR 1046 (3D000): No database selected (the file hit this twice).
+
+[30]  Create new table DEPT with its number, name and location.
+mysql> CREATE TABLE DEPT (DNO INT, DNAME CHAR(20), LOC CHAR(20));
+Query OK, 0 rows affected (0.00 sec)
+NOTE: DEPT's number column is DNO, not DEPTNO, so joins must match EMP.DEPTNO = DEPT.DNO.
+
+------------------------------------------------------------------------------------------------
+EXPERIMENT P2: THE INSERT COMMAND
+------------------------------------------------------------------------------------------------
+AIM: To insert rows into EMP and DEPT.
+
+[2]  To insert values in table EMP.
+mysql> INSERT INTO EMP VALUES (11, 'JOHN', 8500, 10);
+Query OK, 1 row affected (0.00 sec)
+
+mysql> INSERT INTO EMP VALUES (12, 'NRG', 8500, 20);
+Query OK, 1 row affected (0.00 sec)
+
+mysql> INSERT INTO EMP VALUES (13, 'TIA', 15000, 30);
+Query OK, 1 row affected (0.00 sec)
+
+mysql> INSERT INTO EMP VALUES (14, 'RUHI', 16725, 10);
+Query OK, 1 row affected (0.00 sec)
+
+mysql> INSERT INTO EMP VALUES (15, 'KSHVI', 20045, 30);
+Query OK, 1 row affected (0.00 sec)
+
+mysql> INSERT INTO EMP VALUES (16, 'RIDHIMA', 40052, 20);
+Query OK, 1 row affected (0.00 sec)
+
+mysql> INSERT INTO EMP VALUES (17, 'ARMAN', 6000, 30);
+Query OK, 1 row affected (0.00 sec)
+
+mysql> INSERT INTO EMP VALUES (18, 'ISHAN', 8000, 10);
+Query OK, 1 row affected (0.00 sec)
+
+[4]  To insert more values in table EMP.
+mysql> INSERT INTO EMP VALUES (19, 'SPARSH', 9000, 20);
+Query OK, 1 row affected (0.00 sec)
+
+mysql> INSERT INTO EMP VALUES (20, 'MANIKA', 4000, 20);
+Query OK, 1 row affected (0.00 sec)
+
+mysql> INSERT INTO EMP VALUES (21, 'GAURANG', 1200, 30);
+Query OK, 1 row affected (0.00 sec)
+
+mysql> INSERT INTO EMP VALUES (22, 'SUBHASH', 1500, 10);
+Query OK, 1 row affected (0.00 sec)
+NOTE: VALUES must list every column in table order. After JOB is added (task 37) a 4-value
+      INSERT fails with ERROR 1136 (Column count doesn't match value count); then use INSERT
+      INTO EMP (EMPNO, ENAME, SAL, DEPTNO) VALUES (...) or give 5 values.
+
+[31]  Insert values into table DEPT.
+mysql> INSERT INTO DEPT VALUES (10, 'MARKETING', 'DELHI');
+Query OK, 1 row affected (0.00 sec)
+
+mysql> INSERT INTO DEPT VALUES (20, 'PRODUCTION', 'MUMBAI');
+Query OK, 1 row affected (0.00 sec)
+
+mysql> INSERT INTO DEPT VALUES (30, 'ACCOUNTS', 'BANGALORE');
+Query OK, 1 row affected (0.00 sec)
+
+mysql> INSERT INTO DEPT VALUES (40, 'SALES', 'CALCUTTA');
+Query OK, 1 row affected (0.00 sec)
+
+------------------------------------------------------------------------------------------------
+EXPERIMENT P3: THE SELECT AND DISPLAY COMMAND
+------------------------------------------------------------------------------------------------
+AIM: To display rows using SELECT, WHERE, aggregate functions, LIKE and subqueries.
+
+[3]  To display table EMP.
+mysql> SELECT * FROM EMP;
++-------+---------+-------+--------+
+| EMPNO | ENAME   | SAL   | DEPTNO |
++-------+---------+-------+--------+
+|    11 | JOHN    |  8500 |     10 |
+|    12 | NRG     |  8500 |     20 |
+|    13 | TIA     | 15000 |     30 |
+|    14 | RUHI    | 16725 |     10 |
+|    15 | KSHVI   | 20045 |     30 |
+|    16 | RIDHIMA | 40052 |     20 |
+|    17 | ARMAN   |  6000 |     30 |
+|    18 | ISHAN   |  8000 |     10 |
++-------+---------+-------+--------+
+8 rows in set (0.00 sec)
+
+[5]  To show table EMP.
+mysql> SELECT * FROM EMP;
++-------+---------+-------+--------+
+| EMPNO | ENAME   | SAL   | DEPTNO |
++-------+---------+-------+--------+
+|    11 | JOHN    |  8500 |     10 |
+|    12 | NRG     |  8500 |     20 |
+|    13 | TIA     | 15000 |     30 |
+|    14 | RUHI    | 16725 |     10 |
+|    15 | KSHVI   | 20045 |     30 |
+|    16 | RIDHIMA | 40052 |     20 |
+|    17 | ARMAN   |  6000 |     30 |
+|    18 | ISHAN   |  8000 |     10 |
+|    19 | SPARSH  |  9000 |     20 |
+|    20 | MANIKA  |  4000 |     20 |
+|    21 | GAURANG |  1200 |     30 |
+|    22 | SUBHASH |  1500 |     10 |
++-------+---------+-------+--------+
+12 rows in set (0.00 sec)
+
+[6]  To select maximum salary from table EMP.
+mysql> SELECT MAX(SAL) FROM EMP;
++----------+
+| MAX(SAL) |
++----------+
+|    40052 |
++----------+
+1 row in set (0.00 sec)
+NOTE: The file first typed MAX (SAL) with a space and got ERROR 1305 (FUNCTION company.MAX
+      does not exist). No space between a function name and the bracket.
+
+[7]  To select minimum salary from table EMP.
+mysql> SELECT MIN(SAL) FROM EMP;
++----------+
+| MIN(SAL) |
++----------+
+|     1200 |
++----------+
+1 row in set (0.00 sec)
+
+[8]  To calculate sum of salary from table EMP.
+mysql> SELECT SUM(SAL) FROM EMP;
++----------+
+| SUM(SAL) |
++----------+
+|   138522 |
++----------+
+1 row in set (0.00 sec)
+
+[8a]  (extra) Average salary.
+mysql> SELECT AVG(SAL) FROM EMP;
++------------+
+| AVG(SAL)   |
++------------+
+| 11543.5000 |
++------------+
+1 row in set (0.00 sec)
+
+[8b]  (extra) Number of employees.
+mysql> SELECT COUNT(*) FROM EMP;
++----------+
+| COUNT(*) |
++----------+
+|       12 |
++----------+
+1 row in set (0.00 sec)
+
+[11]  To list employees whose name begins with letter 'A'.
+mysql> SELECT * FROM EMP WHERE ENAME LIKE 'A%';
++-------+-------+------+--------+
+| EMPNO | ENAME | SAL  | DEPTNO |
++-------+-------+------+--------+
+|    17 | ARMAN | 6000 |     30 |
++-------+-------+------+--------+
+1 row in set (0.00 sec)
+NOTE: The file first typed LIKE 'A %' (with a space), which returns an empty set: the space is
+      a real character.
+
+[12]  To list details of employees whose name has letter 'A' at second position.
+mysql> SELECT * FROM EMP WHERE ENAME LIKE '_A%';
++-------+---------+------+--------+
+| EMPNO | ENAME   | SAL  | DEPTNO |
++-------+---------+------+--------+
+|    20 | MANIKA  | 4000 |     20 |
+|    21 | GAURANG | 1200 |     30 |
++-------+---------+------+--------+
+2 rows in set (0.00 sec)
+
+[13]  To list employee details whose length of name is 3.
+mysql> SELECT * FROM EMP WHERE ENAME LIKE '___';
++-------+-------+-------+--------+
+| EMPNO | ENAME | SAL   | DEPTNO |
++-------+-------+-------+--------+
+|    12 | NRG   |  8500 |     20 |
+|    13 | TIA   | 15000 |     30 |
++-------+-------+-------+--------+
+2 rows in set (0.00 sec)
+NOTE: Three underscores and no % means exactly 3 characters.
+
+[14]  To list employee details whose length of name is 4.
+mysql> SELECT * FROM EMP WHERE ENAME LIKE '____';
++-------+-------+-------+--------+
+| EMPNO | ENAME | SAL   | DEPTNO |
++-------+-------+-------+--------+
+|    11 | JOHN  |  8500 |     10 |
+|    14 | RUHI  | 16725 |     10 |
++-------+-------+-------+--------+
+2 rows in set (0.00 sec)
+
+[15]  To list employee details whose length of name is 5.
+mysql> SELECT * FROM EMP WHERE ENAME LIKE '_____';
++-------+-------+-------+--------+
+| EMPNO | ENAME | SAL   | DEPTNO |
++-------+-------+-------+--------+
+|    15 | KSHVI | 20045 |     30 |
+|    17 | ARMAN |  6000 |     30 |
+|    18 | ISHAN |  8000 |     10 |
++-------+-------+-------+--------+
+3 rows in set (0.00 sec)
+NOTE: The file's pattern had 6 underscores, so it listed SPARSH and MANIKA (6 letters). Five
+      underscores is correct. Easier: CHAR_LENGTH(ENAME) = 5 (shown next).
+
+[15a]  (extra) Same using CHAR_LENGTH.
+mysql> SELECT * FROM EMP WHERE CHAR_LENGTH(ENAME) = 5;
++-------+-------+-------+--------+
+| EMPNO | ENAME | SAL   | DEPTNO |
++-------+-------+-------+--------+
+|    15 | KSHVI | 20045 |     30 |
+|    17 | ARMAN |  6000 |     30 |
+|    18 | ISHAN |  8000 |     10 |
++-------+-------+-------+--------+
+3 rows in set (0.00 sec)
+
+[21]  To display the details of the employee having maximum salary.
+mysql> SELECT * FROM EMP WHERE SAL = (SELECT MAX(SAL) FROM EMP);
++-------+---------+-------+--------+
+| EMPNO | ENAME   | SAL   | DEPTNO |
++-------+---------+-------+--------+
+|    16 | RIDHIMA | 40052 |     20 |
++-------+---------+-------+--------+
+1 row in set (0.00 sec)
+NOTE: The inner query runs first (MAX(SAL) = 40052 at this point) and its value is used by the
+      outer query. WHERE SAL = MAX(SAL) without a subquery is ERROR 1111 (Invalid use of group
+      function).
+
+[22]  To display the details of the employee whose EMPNO = 15.
+mysql> SELECT * FROM EMP WHERE EMPNO = 15;
++-------+-------+-------+--------+
+| EMPNO | ENAME | SAL   | DEPTNO |
++-------+-------+-------+--------+
+|    15 | KSHVI | 20045 |     30 |
++-------+-------+-------+--------+
+1 row in set (0.00 sec)
+NOTE: The file used WHERE DEPTNO = (SELECT DEPTNO FROM EMP WHERE EMPNO = 15), which lists
+      everyone in employee 15's department (4 rows), not employee 15.
+
+[23]  To display the details of the employee whose name is SPARSH.
+mysql> SELECT * FROM EMP WHERE ENAME = 'SPARSH';
++-------+--------+------+--------+
+| EMPNO | ENAME  | SAL  | DEPTNO |
++-------+--------+------+--------+
+|    19 | SPARSH | 9000 |     20 |
++-------+--------+------+--------+
+1 row in set (0.00 sec)
+
+[24]  To display the details of the employee whose name is TIA.
+mysql> SELECT * FROM EMP WHERE ENAME = 'TIA';
++-------+-------+-------+--------+
+| EMPNO | ENAME | SAL   | DEPTNO |
++-------+-------+-------+--------+
+|    13 | TIA   | 15000 |     30 |
++-------+-------+-------+--------+
+1 row in set (0.00 sec)
+
+[25]  To display the names of employees whose salary is greater than 5000 but less than 15000.
+mysql> SELECT ENAME FROM EMP WHERE SAL > 5000 AND SAL < 15000;
++--------+
+| ENAME  |
++--------+
+| JOHN   |
+| NRG    |
+| ARMAN  |
+| ISHAN  |
+| SPARSH |
++--------+
+5 rows in set (0.00 sec)
+NOTE: 'Greater than' and 'less than' are strict, so BETWEEN (which includes both ends) would
+      also return TIA at exactly 15000 (shown next).
+
+[25a]  (extra) BETWEEN includes both ends.
+mysql> SELECT ENAME, SAL FROM EMP WHERE SAL BETWEEN 5000 AND 15000;
++--------+-------+
+| ENAME  | SAL   |
++--------+-------+
+| JOHN   |  8500 |
+| NRG    |  8500 |
+| TIA    | 15000 |
+| ARMAN  |  6000 |
+| ISHAN  |  8000 |
+| SPARSH |  9000 |
++--------+-------+
+6 rows in set (0.00 sec)
+
+------------------------------------------------------------------------------------------------
+EXPERIMENT P4: THE ORDER BY CLAUSE
+------------------------------------------------------------------------------------------------
+AIM: To sort the output.
+
+[9]  To display employees whose salary is greater than 5000, in alphabetical order of name.
+mysql> SELECT * FROM EMP WHERE SAL > 5000 ORDER BY ENAME;
++-------+---------+-------+--------+
+| EMPNO | ENAME   | SAL   | DEPTNO |
++-------+---------+-------+--------+
+|    17 | ARMAN   |  6000 |     30 |
+|    18 | ISHAN   |  8000 |     10 |
+|    11 | JOHN    |  8500 |     10 |
+|    15 | KSHVI   | 20045 |     30 |
+|    12 | NRG     |  8500 |     20 |
+|    16 | RIDHIMA | 40052 |     20 |
+|    14 | RUHI    | 16725 |     10 |
+|    19 | SPARSH  |  9000 |     20 |
+|    13 | TIA     | 15000 |     30 |
++-------+---------+-------+--------+
+9 rows in set (0.00 sec)
+
+[10]  To display the employees in descending order of EMPNO.
+mysql> SELECT * FROM EMP ORDER BY EMPNO DESC;
++-------+---------+-------+--------+
+| EMPNO | ENAME   | SAL   | DEPTNO |
++-------+---------+-------+--------+
+|    22 | SUBHASH |  1500 |     10 |
+|    21 | GAURANG |  1200 |     30 |
+|    20 | MANIKA  |  4000 |     20 |
+|    19 | SPARSH  |  9000 |     20 |
+|    18 | ISHAN   |  8000 |     10 |
+|    17 | ARMAN   |  6000 |     30 |
+|    16 | RIDHIMA | 40052 |     20 |
+|    15 | KSHVI   | 20045 |     30 |
+|    14 | RUHI    | 16725 |     10 |
+|    13 | TIA     | 15000 |     30 |
+|    12 | NRG     |  8500 |     20 |
+|    11 | JOHN    |  8500 |     10 |
++-------+---------+-------+--------+
+12 rows in set (0.00 sec)
+NOTE: The file sorted ORDER BY SAL DESC, but the task asks for EMPNO.
+
+------------------------------------------------------------------------------------------------
+EXPERIMENT P5: THE DISTINCT COMMAND
+------------------------------------------------------------------------------------------------
+AIM: To remove duplicate values from the output.
+
+[16]  To list the DEPTNO values in EMP without repeats.
+mysql> SELECT DISTINCT DEPTNO FROM EMP;
++--------+
+| DEPTNO |
++--------+
+|     10 |
+|     20 |
+|     30 |
++--------+
+3 rows in set (0.00 sec)
+
+[17]  To count the number of different DEPTNO values.
+mysql> SELECT COUNT(DISTINCT DEPTNO) FROM EMP;
++------------------------+
+| COUNT(DISTINCT DEPTNO) |
++------------------------+
+|                      3 |
++------------------------+
+1 row in set (0.00 sec)
+NOTE: DISTINCT goes inside COUNT. The file's DISTINCT(DEPTNO) with brackets works the same.
+
+[54]  To display the distinct jobs of employees.
+mysql> SELECT DISTINCT JOB FROM EMP;
++----------+
+| JOB      |
++----------+
+| STAFF    |
+| TEACHER  |
+| LAWYER   |
+| CHEF     |
+| DOCTOR   |
+| ENGINEER |
+| GARDENER |
+| MANAGER  |
+| NULL     |
+| PILATE   |
++----------+
+10 rows in set (0.00 sec)
+NOTE: NULL (GAURANG has no job) appears as one of the distinct values.
+
+[55]  To count the number of distinct jobs.
+mysql> SELECT COUNT(DISTINCT JOB) FROM EMP;
++---------------------+
+| COUNT(DISTINCT JOB) |
++---------------------+
+|                   9 |
++---------------------+
+1 row in set (0.00 sec)
+NOTE: COUNT skips NULL, so this is 9 although the list above shows 10 values.
+
+------------------------------------------------------------------------------------------------
+EXPERIMENT P6: THE IN, NOT IN COMMAND
+------------------------------------------------------------------------------------------------
+AIM: To test membership in a list.
+
+[26]  To display ENAME and EMPNO of employees whose DEPTNO is either 10 or 20.
+mysql> SELECT ENAME, EMPNO FROM EMP WHERE DEPTNO = 10 OR DEPTNO = 20;
++---------+-------+
+| ENAME   | EMPNO |
++---------+-------+
+| JOHN    |    11 |
+| NRG     |    12 |
+| RUHI    |    14 |
+| RIDHIMA |    16 |
+| ISHAN   |    18 |
+| SPARSH  |    19 |
+| MANIKA  |    20 |
+| SUBHASH |    22 |
++---------+-------+
+8 rows in set (0.00 sec)
+NOTE: Same as WHERE DEPTNO IN (10, 20).
+
+[27]  To display employees whose DEPTNO is 10, 20 or 30.
+mysql> SELECT * FROM EMP WHERE DEPTNO IN (10, 20, 30);
++-------+---------+-------+--------+
+| EMPNO | ENAME   | SAL   | DEPTNO |
++-------+---------+-------+--------+
+|    11 | JOHN    |  8500 |     10 |
+|    12 | NRG     |  8500 |     20 |
+|    13 | TIA     | 15000 |     30 |
+|    14 | RUHI    | 16725 |     10 |
+|    15 | KSHVI   | 20045 |     30 |
+|    16 | RIDHIMA | 40052 |     20 |
+|    17 | ARMAN   |  6000 |     30 |
+|    18 | ISHAN   |  8000 |     10 |
+|    19 | SPARSH  |  9000 |     20 |
+|    20 | MANIKA  |  4000 |     20 |
+|    21 | GAURANG |  1200 |     30 |
+|    22 | SUBHASH |  1500 |     10 |
++-------+---------+-------+--------+
+12 rows in set (0.00 sec)
+
+[28]  To display employees whose DEPTNO is not 10, 20 or 30.
+mysql> SELECT * FROM EMP WHERE DEPTNO NOT IN (10, 20, 30);
+Empty set (0.00 sec)
+NOTE: Every employee is in 10, 20 or 30, so the result is empty.
+
+[29]  To display employees whose DEPTNO is 20 or 30.
+mysql> SELECT * FROM EMP WHERE DEPTNO IN (20, 30);
++-------+---------+-------+--------+
+| EMPNO | ENAME   | SAL   | DEPTNO |
++-------+---------+-------+--------+
+|    12 | NRG     |  8500 |     20 |
+|    13 | TIA     | 15000 |     30 |
+|    15 | KSHVI   | 20045 |     30 |
+|    16 | RIDHIMA | 40052 |     20 |
+|    17 | ARMAN   |  6000 |     30 |
+|    19 | SPARSH  |  9000 |     20 |
+|    20 | MANIKA  |  4000 |     20 |
+|    21 | GAURANG |  1200 |     30 |
++-------+---------+-------+--------+
+8 rows in set (0.00 sec)
+NOTE: The file used NOT IN (20, 30), which returns department 10: the opposite of the task.
+
+------------------------------------------------------------------------------------------------
+EXPERIMENT P7: THE GROUP BY ... HAVING CLAUSE
+------------------------------------------------------------------------------------------------
+AIM: To compute aggregates per group and filter groups.
+
+[18]  To count the number of employees in each department.
+mysql> SELECT DEPTNO, COUNT(*) FROM EMP GROUP BY DEPTNO;
++--------+----------+
+| DEPTNO | COUNT(*) |
++--------+----------+
+|     10 |        4 |
+|     20 |        4 |
+|     30 |        4 |
++--------+----------+
+3 rows in set (0.00 sec)
+
+[19]  To display the maximum salary in each department.
+mysql> SELECT DEPTNO, MAX(SAL) FROM EMP GROUP BY DEPTNO;
++--------+----------+
+| DEPTNO | MAX(SAL) |
++--------+----------+
+|     10 |    16725 |
+|     20 |    40052 |
+|     30 |    20045 |
++--------+----------+
+3 rows in set (0.00 sec)
+
+[20]  To display the departments having more than 2 employees.
+mysql> SELECT DEPTNO, COUNT(*) FROM EMP GROUP BY DEPTNO HAVING COUNT(*) > 2;
++--------+----------+
+| DEPTNO | COUNT(*) |
++--------+----------+
+|     10 |        4 |
+|     20 |        4 |
+|     30 |        4 |
++--------+----------+
+3 rows in set (0.00 sec)
+NOTE: A condition on a group's aggregate goes in HAVING (after GROUP BY). WHERE COUNT(*) > 2
+      is ERROR 1111.
+
+[20a]  (extra) Departments whose total salary is more than 40000.
+mysql> SELECT DEPTNO, SUM(SAL) FROM EMP GROUP BY DEPTNO HAVING SUM(SAL) > 40000;
++--------+----------+
+| DEPTNO | SUM(SAL) |
++--------+----------+
+|     20 |    61552 |
+|     30 |    42245 |
++--------+----------+
+2 rows in set (0.00 sec)
+
+------------------------------------------------------------------------------------------------
+EXPERIMENT P8: THE JOIN COMMAND
+------------------------------------------------------------------------------------------------
+AIM: To combine rows of EMP and DEPT.
+
+[33]  To display employee details with their department name and location from EMP and DEPT.
+mysql> SELECT ENAME, SAL, EMPNO, DNAME, LOC FROM EMP, DEPT WHERE EMP.DEPTNO = DEPT.DNO;
++---------+-------+-------+------------+-----------+
+| ENAME   | SAL   | EMPNO | DNAME      | LOC       |
++---------+-------+-------+------------+-----------+
+| JOHN    |  8500 |    11 | MARKETING  | DELHI     |
+| NRG     |  8500 |    12 | PRODUCTION | MUMBAI    |
+| TIA     | 15000 |    13 | ACCOUNTS   | BANGALORE |
+| RUHI    | 16725 |    14 | MARKETING  | DELHI     |
+| KSHVI   | 20045 |    15 | ACCOUNTS   | BANGALORE |
+| RIDHIMA | 40052 |    16 | PRODUCTION | MUMBAI    |
+| ARMAN   |  6000 |    17 | ACCOUNTS   | BANGALORE |
+| ISHAN   |  8000 |    18 | MARKETING  | DELHI     |
+| SPARSH  |  9000 |    19 | PRODUCTION | MUMBAI    |
+| MANIKA  |  4000 |    20 | PRODUCTION | MUMBAI    |
+| GAURANG |  1200 |    21 | ACCOUNTS   | BANGALORE |
+| SUBHASH |  1500 |    22 | MARKETING  | DELHI     |
++---------+-------+-------+------------+-----------+
+12 rows in set (0.00 sec)
+NOTE: Without the WHERE join condition you get a Cartesian product: 12 x 4 = 48 rows.
+
+[33a]  (extra) Same with INNER JOIN ... ON, only department 30.
+mysql> SELECT E.ENAME, D.DNAME, D.LOC FROM EMP E INNER JOIN DEPT D ON E.DEPTNO = D.DNO WHERE D.DNO = 30;
++---------+----------+-----------+
+| ENAME   | DNAME    | LOC       |
++---------+----------+-----------+
+| TIA     | ACCOUNTS | BANGALORE |
+| KSHVI   | ACCOUNTS | BANGALORE |
+| ARMAN   | ACCOUNTS | BANGALORE |
+| GAURANG | ACCOUNTS | BANGALORE |
++---------+----------+-----------+
+4 rows in set (0.00 sec)
+
+[33b]  (extra) LEFT JOIN keeps departments without employees (SALES has 0).
+mysql> SELECT D.DNO, D.DNAME, COUNT(E.EMPNO) FROM DEPT D LEFT JOIN EMP E ON E.DEPTNO = D.DNO GROUP BY D.DNO, D.DNAME;
++-----+------------+----------------+
+| DNO | DNAME      | COUNT(E.EMPNO) |
++-----+------------+----------------+
+|  10 | MARKETING  |              4 |
+|  20 | PRODUCTION |              4 |
+|  30 | ACCOUNTS   |              4 |
+|  40 | SALES      |              0 |
++-----+------------+----------------+
+4 rows in set (0.00 sec)
+
+------------------------------------------------------------------------------------------------
+EXPERIMENT P9: THE UPDATE COMMAND
+------------------------------------------------------------------------------------------------
+AIM: To change existing rows.
+
+[38]  To change the salary of employee RIDHIMA to 45000.
+mysql> UPDATE EMP SET SAL = 45000 WHERE ENAME = 'RIDHIMA';
+Query OK, 1 row affected (0.00 sec)
+Rows matched: 1  Changed: 1  Warnings: 0
+
+[39]  Display the table EMP.
+mysql> SELECT * FROM EMP;
++-------+---------+-------+--------+------+
+| EMPNO | ENAME   | SAL   | DEPTNO | JOB  |
++-------+---------+-------+--------+------+
+|    11 | JOHN    |  8500 |     10 | NULL |
+|    12 | NRG     |  8500 |     20 | NULL |
+|    13 | TIA     | 15000 |     30 | NULL |
+|    14 | RUHI    | 16725 |     10 | NULL |
+|    15 | KSHVI   | 20045 |     30 | NULL |
+|    16 | RIDHIMA | 45000 |     20 | NULL |
+|    17 | ARMAN   |  6000 |     30 | NULL |
+|    18 | ISHAN   |  8000 |     10 | NULL |
+|    19 | SPARSH  |  9000 |     20 | NULL |
+|    20 | MANIKA  |  4000 |     20 | NULL |
+|    21 | GAURANG |  1200 |     30 | NULL |
+|    22 | SUBHASH |  1500 |     10 | NULL |
++-------+---------+-------+--------+------+
+12 rows in set (0.00 sec)
+
+[40]  To change the salary of employee RUHI to 16000.
+mysql> UPDATE EMP SET SAL = 16000 WHERE ENAME = 'RUHI';
+Query OK, 1 row affected (0.00 sec)
+Rows matched: 1  Changed: 1  Warnings: 0
+
+[41]  To change the JOB of employee SUBHASH to 'PILATE'.
+mysql> UPDATE EMP SET JOB = 'PILATE' WHERE ENAME = 'SUBHASH';
+Query OK, 1 row affected (0.00 sec)
+Rows matched: 1  Changed: 1  Warnings: 0
+
+[42]  JOB of RIDHIMA to 'ENGINEER'.
+mysql> UPDATE EMP SET JOB = 'ENGINEER' WHERE ENAME = 'RIDHIMA';
+Query OK, 1 row affected (0.00 sec)
+Rows matched: 1  Changed: 1  Warnings: 0
+
+[43]  JOB of JOHN to 'STAFF'.
+mysql> UPDATE EMP SET JOB = 'STAFF' WHERE ENAME = 'JOHN';
+Query OK, 1 row affected (0.00 sec)
+Rows matched: 1  Changed: 1  Warnings: 0
+
+[44]  JOB of NRG to 'TEACHER'.
+mysql> UPDATE EMP SET JOB = 'TEACHER' WHERE ENAME = 'NRG';
+Query OK, 1 row affected (0.00 sec)
+Rows matched: 1  Changed: 1  Warnings: 0
+
+[45]  JOB of TIA to 'LAWYER'.
+mysql> UPDATE EMP SET JOB = 'LAWYER' WHERE ENAME = 'TIA';
+Query OK, 1 row affected (0.00 sec)
+Rows matched: 1  Changed: 1  Warnings: 0
+
+[46]  JOB of KSHVI to 'DOCTOR'.
+mysql> UPDATE EMP SET JOB = 'DOCTOR' WHERE ENAME = 'KSHVI';
+Query OK, 1 row affected (0.00 sec)
+Rows matched: 1  Changed: 1  Warnings: 0
+
+[47]  JOB of ARMAN to 'GARDENER'.
+mysql> UPDATE EMP SET JOB = 'GARDENER' WHERE ENAME = 'ARMAN';
+Query OK, 1 row affected (0.00 sec)
+Rows matched: 1  Changed: 1  Warnings: 0
+
+[48]  JOB of ISHAN to 'MANAGER'.
+mysql> UPDATE EMP SET JOB = 'MANAGER' WHERE ENAME = 'ISHAN';
+Query OK, 1 row affected (0.00 sec)
+Rows matched: 1  Changed: 1  Warnings: 0
+
+[49]  JOB of SPARSH to 'ENGINEER'.
+mysql> UPDATE EMP SET JOB = 'ENGINEER' WHERE ENAME = 'SPARSH';
+Query OK, 1 row affected (0.00 sec)
+Rows matched: 1  Changed: 1  Warnings: 0
+
+[50]  JOB of MANIKA to 'TEACHER'.
+mysql> UPDATE EMP SET JOB = 'TEACHER' WHERE ENAME = 'MANIKA';
+Query OK, 1 row affected (0.00 sec)
+Rows matched: 1  Changed: 1  Warnings: 0
+NOTE: The file has no task 51 (numbering jumps from 50 to 52).
+
+[52]  Display the details of EMP.
+mysql> SELECT * FROM EMP;
++-------+---------+-------+--------+----------+
+| EMPNO | ENAME   | SAL   | DEPTNO | JOB      |
++-------+---------+-------+--------+----------+
+|    11 | JOHN    |  8500 |     10 | STAFF    |
+|    12 | NRG     |  8500 |     20 | TEACHER  |
+|    13 | TIA     | 15000 |     30 | LAWYER   |
+|    14 | RUHI    | 16000 |     10 | NULL     |
+|    15 | KSHVI   | 20045 |     30 | DOCTOR   |
+|    16 | RIDHIMA | 45000 |     20 | ENGINEER |
+|    17 | ARMAN   |  6000 |     30 | GARDENER |
+|    18 | ISHAN   |  8000 |     10 | MANAGER  |
+|    19 | SPARSH  |  9000 |     20 | ENGINEER |
+|    20 | MANIKA  |  4000 |     20 | TEACHER  |
+|    21 | GAURANG |  1200 |     30 | NULL     |
+|    22 | SUBHASH |  1500 |     10 | PILATE   |
++-------+---------+-------+--------+----------+
+12 rows in set (0.00 sec)
+
+[53]  To change the JOB of employee RUHI to 'CHEF'.
+mysql> UPDATE EMP SET JOB = 'CHEF' WHERE ENAME = 'RUHI';
+Query OK, 1 row affected (0.00 sec)
+Rows matched: 1  Changed: 1  Warnings: 0
+
+[53a]  Final table EMP.
+mysql> SELECT * FROM EMP;
++-------+---------+-------+--------+----------+
+| EMPNO | ENAME   | SAL   | DEPTNO | JOB      |
++-------+---------+-------+--------+----------+
+|    11 | JOHN    |  8500 |     10 | STAFF    |
+|    12 | NRG     |  8500 |     20 | TEACHER  |
+|    13 | TIA     | 15000 |     30 | LAWYER   |
+|    14 | RUHI    | 16000 |     10 | CHEF     |
+|    15 | KSHVI   | 20045 |     30 | DOCTOR   |
+|    16 | RIDHIMA | 45000 |     20 | ENGINEER |
+|    17 | ARMAN   |  6000 |     30 | GARDENER |
+|    18 | ISHAN   |  8000 |     10 | MANAGER  |
+|    19 | SPARSH  |  9000 |     20 | ENGINEER |
+|    20 | MANIKA  |  4000 |     20 | TEACHER  |
+|    21 | GAURANG |  1200 |     30 | NULL     |
+|    22 | SUBHASH |  1500 |     10 | PILATE   |
++-------+---------+-------+--------+----------+
+12 rows in set (0.00 sec)
+
+[55a]  (extra) Employees whose JOB is not filled in.
+mysql> SELECT * FROM EMP WHERE JOB IS NULL;
++-------+---------+------+--------+------+
+| EMPNO | ENAME   | SAL  | DEPTNO | JOB  |
++-------+---------+------+--------+------+
+|    21 | GAURANG | 1200 |     30 | NULL |
++-------+---------+------+--------+------+
+1 row in set (0.00 sec)
+NOTE: Use IS NULL. WHERE JOB = NULL is never true and returns an empty set.
+
+[55b]  (extra) Give department 10 a raise of 1000.
+mysql> UPDATE EMP SET SAL = SAL + 1000 WHERE DEPTNO = 10;
+Query OK, 4 rows affected (0.00 sec)
+Rows matched: 4  Changed: 4  Warnings: 0
+
+[55c]  (extra) Delete the employees without a JOB.
+mysql> DELETE FROM EMP WHERE JOB IS NULL;
+Query OK, 1 row affected (0.00 sec)
+NOTE: Without WHERE, UPDATE and DELETE change every row.
+
+------------------------------------------------------------------------------------------------
+EXPERIMENT P10: THE ALTER TABLE COMMAND
+------------------------------------------------------------------------------------------------
+AIM: To change the structure of a table.
+
+[37]  To add column JOB in table EMP.
+mysql> ALTER TABLE EMP ADD (JOB CHAR(20));
+Query OK, 0 rows affected (0.00 sec)
+NOTE: Existing rows get JOB = NULL until UPDATE fills them (tasks 41-53). Other forms: ALTER
+      TABLE EMP MODIFY JOB VARCHAR(30); ALTER TABLE EMP CHANGE JOB DESIGNATION CHAR(20); ALTER
+      TABLE EMP DROP COLUMN JOB; ALTER TABLE EMP RENAME TO EMPLOYEE;
+
+------------------------------------------------------------------------------------------------
+EXPERIMENT P11: CREATING TABLE FROM EXISTING TABLE
+------------------------------------------------------------------------------------------------
+AIM: To copy a table with CREATE TABLE ... AS SELECT.
+
+[34]  To show table MANAGER.
+mysql> CREATE TABLE MANAGER AS SELECT * FROM EMP WHERE DEPTNO = 10;
+Query OK, 4 rows affected (0.00 sec)
+Records: 4  Duplicates: 0  Warnings: 0
+
+mysql> SELECT * FROM MANAGER;
++-------+---------+-------+--------+
+| EMPNO | ENAME   | SAL   | DEPTNO |
++-------+---------+-------+--------+
+|    11 | JOHN    |  8500 |     10 |
+|    14 | RUHI    | 16725 |     10 |
+|    18 | ISHAN   |  8000 |     10 |
+|    22 | SUBHASH |  1500 |     10 |
++-------+---------+-------+--------+
+4 rows in set (0.00 sec)
+NOTE: The file only shows SELECT * FROM MANAGER; it never shows how MANAGER was made. A CREATE
+      TABLE ... AS SELECT like the one above is the usual way (the file's MANAGER held 11
+      employees).
+
+[35]  Create another table EMP2 and copy all values from table EMP.
+mysql> CREATE TABLE EMP2 AS SELECT * FROM EMP;
+Query OK, 12 rows affected (0.00 sec)
+Records: 12  Duplicates: 0  Warnings: 0
+
+mysql> SELECT * FROM EMP2;
++-------+---------+-------+--------+
+| EMPNO | ENAME   | SAL   | DEPTNO |
++-------+---------+-------+--------+
+|    11 | JOHN    |  8500 |     10 |
+|    12 | NRG     |  8500 |     20 |
+|    13 | TIA     | 15000 |     30 |
+|    14 | RUHI    | 16725 |     10 |
+|    15 | KSHVI   | 20045 |     30 |
+|    16 | RIDHIMA | 40052 |     20 |
+|    17 | ARMAN   |  6000 |     30 |
+|    18 | ISHAN   |  8000 |     10 |
+|    19 | SPARSH  |  9000 |     20 |
+|    20 | MANIKA  |  4000 |     20 |
+|    21 | GAURANG |  1200 |     30 |
+|    22 | SUBHASH |  1500 |     10 |
++-------+---------+-------+--------+
+12 rows in set (0.00 sec)
+NOTE: The file first tried CREATE TABLE EMP2; and got ERROR 1113 (A table must have at least 1
+      column). CTAS copies columns and rows, but not PRIMARY KEY / FOREIGN KEY constraints.
+      Structure only: CREATE TABLE EMP3 AS SELECT * FROM EMP WHERE 1 = 0; or CREATE TABLE EMP3
+      LIKE EMP;
+
+------------------------------------------------------------------------------------------------
+EXPERIMENT P12: THE DROP TABLE COMMAND
+------------------------------------------------------------------------------------------------
+AIM: To delete a table completely.
+
+[36]  To delete table EMP2.
+mysql> DROP TABLE EMP2;
+Query OK, 0 rows affected (0.00 sec)
+
+mysql> SELECT * FROM EMP2;
+ERROR 1146 (42S02): Table 'company.emp2' doesn't exist
+NOTE: DROP removes structure and data. TRUNCATE TABLE EMP2; would empty it but keep the table;
+      DELETE FROM EMP2; removes rows one by one (and can be rolled back on InnoDB).
+
+================================================================================================
+PART C: OFFICIAL SYLLABUS LAB LIST (EMPLOYEE & DEPARTMENT TABLES)
+================================================================================================
+The CSE201 syllabus lists these lab tasks on Employee and Department tables (they come from Oracle's
+SQL course, which uses the HR sample schema). Below: the tables (MySQL), then each task with MySQL code,
+the Oracle form where different, and the output on the sample data.
+
+------------------------------------------------------------------------------------------------
+TABLES (run these first)
+------------------------------------------------------------------------------------------------
+CREATE TABLE departments (department_id INT PRIMARY KEY, department_name VARCHAR(30), manager_id INT, location_id INT);
+INSERT INTO departments VALUES (10,'Administration',200,1700),(20,'Marketing',201,1800),(50,'Shipping',124,1500),(60,'IT',103,1400),(80,'Sales',149,2500),(90,'Executive',100,1700),(110,'Accounting',205,1700),(190,'Contracting',NULL,1700);
+CREATE TABLE employees (employee_id INT PRIMARY KEY, first_name VARCHAR(20), last_name VARCHAR(25), job_id VARCHAR(10), salary INT, commission_pct DECIMAL(2,2), manager_id INT, department_id INT, hire_date DATE);
+INSERT INTO employees VALUES
+(100,'Steven','King','AD_PRES',24000,NULL,NULL,90,'1987-06-17'),
+(101,'Neena','Kochhar','AD_VP',17000,NULL,100,90,'1989-09-21'),
+(102,'Lex','De Haan','AD_VP',17000,NULL,100,90,'1993-01-13'),
+(103,'Alexander','Hunold','IT_PROG',9000,NULL,102,60,'1990-01-03'),
+(104,'Bruce','Ernst','IT_PROG',6000,NULL,103,60,'1991-05-21'),
+(107,'Diana','Lorentz','IT_PROG',4200,NULL,103,60,'1999-02-07'),
+(124,'Kevin','Mourgos','ST_MAN',5800,NULL,100,50,'1999-11-16'),
+(141,'Trenna','Rajs','ST_CLERK',3500,NULL,124,50,'1995-10-17'),
+(142,'Curtis','Davies','ST_CLERK',3100,NULL,124,50,'1997-01-29'),
+(143,'Randall','Matos','ST_CLERK',2600,NULL,124,50,'1998-03-15'),
+(144,'Peter','Vargas','ST_CLERK',2500,NULL,124,50,'1998-07-09'),
+(149,'Eleni','Zlotkey','SA_MAN',10500,0.2,100,80,'2000-01-29'),
+(174,'Ellen','Abel','SA_REP',11000,0.3,149,80,'1996-05-11'),
+(176,'Jonathon','Taylor','SA_REP',8600,0.2,149,80,'1998-03-24'),
+(178,'Kimberely','Grant','SA_REP',7000,0.15,149,NULL,'1999-05-24'),
+(200,'Jennifer','Whalen','AD_ASST',4400,NULL,101,10,'1987-09-17'),
+(201,'Michael','Hartstein','MK_MAN',13000,NULL,100,20,'1996-02-17'),
+(202,'Pat','Fay','MK_REP',6000,NULL,201,20,'1997-08-17'),
+(205,'Shelley','Higgins','AC_MGR',12000,NULL,101,110,'1994-06-07'),
+(206,'William','Gietz','AC_ACCOUNT',8300,NULL,205,110,'1994-06-07');
+
+LAB 1  Display the last name and job title of all employees who do not have a manager.
+mysql> SELECT last_name, job_id FROM employees WHERE manager_id IS NULL;
++-----------+---------+
+| last_name | job_id  |
++-----------+---------+
+| King      | AD_PRES |
++-----------+---------+
+1 row in set (0.00 sec)
+NOTE: 'No manager' is stored as NULL, so use IS NULL. manager_id = NULL returns an empty set
+      without any error.
+
+LAB 2  Display the last name, salary and commission of all employees who earn commissions. Sort in descending order of salary and commission.
+mysql> SELECT last_name, salary, commission_pct FROM employees WHERE commission_pct IS NOT NULL ORDER BY salary DESC, commission_pct DESC;
++-----------+--------+----------------+
+| last_name | salary | commission_pct |
++-----------+--------+----------------+
+| Abel      |  11000 |         0.3000 |
+| Zlotkey   |  10500 |         0.2000 |
+| Taylor    |   8600 |         0.2000 |
+| Grant     |   7000 |         0.1500 |
++-----------+--------+----------------+
+4 rows in set (0.00 sec)
+
+LAB 3  Prompt the user for a manager ID and generate the employee ID, last name, salary and department for that manager's employees, with the ability to sort on a selected column.
+Oracle (SQL*Plus substitution variables, these really prompt):
+SQL> SELECT employee_id, last_name, salary, department_id
+  2  FROM employees
+  3  WHERE manager_id = &mgr_num
+  4  ORDER BY &order_col;
+Enter value for mgr_num: 103
+Enter value for order_col: last_name
+
+MySQL (no prompt; set a user variable first):
+mysql> SET @mgr = 103;
+Query OK, 0 rows affected (0.00 sec)
+mysql> SELECT employee_id, last_name, salary, department_id FROM employees WHERE manager_id = @mgr ORDER BY last_name;
++-------------+-----------+--------+---------------+
+| employee_id | last_name | salary | department_id |
++-------------+-----------+--------+---------------+
+|         104 | Ernst     |   6000 |            60 |
+|         107 | Lorentz   |   4200 |            60 |
++-------------+-----------+--------+---------------+
+2 rows in set (0.00 sec)
+NOTE: The employees OF manager 103 are the rows whose manager_id is 103, not the row whose
+      employee_id is 103.
+
+LAB 4  Display all employee last names in which the third letter of the name is a.
+mysql> SELECT last_name FROM employees WHERE last_name LIKE '__a%';
++-----------+
+| last_name |
++-----------+
+| Grant     |
+| Whalen    |
++-----------+
+2 rows in set (0.00 sec)
+NOTE: Two underscores for letters 1-2, then a.
+
+LAB 5  Display the last name of all employees who have both an a and an e in their last name.
+mysql> SELECT last_name FROM employees WHERE last_name LIKE '%a%' AND last_name LIKE '%e%';
++-----------+
+| last_name |
++-----------+
+| De Haan   |
+| Davies    |
+| Abel      |
+| Whalen    |
+| Hartstein |
++-----------+
+5 rows in set (0.00 sec)
+NOTE: '%a%e%' would miss names where e comes before a (De Haan).
+
+LAB 6  Display the last name, job and salary for all employees whose job is sales representative or stock clerk and whose salary is not equal to 2500, 3500 or 7000.
+mysql> SELECT last_name, job_id, salary FROM employees WHERE job_id IN ('SA_REP', 'ST_CLERK') AND salary NOT IN (2500, 3500, 7000);
++-----------+----------+--------+
+| last_name | job_id   | salary |
++-----------+----------+--------+
+| Davies    | ST_CLERK |   3100 |
+| Matos     | ST_CLERK |   2600 |
+| Abel      | SA_REP   |  11000 |
+| Taylor    | SA_REP   |   8600 |
++-----------+----------+--------+
+4 rows in set (0.00 sec)
+
+LAB 7  Display the employee number, last name, salary and salary increased by 15.5% (whole number). Label the column New Salary.
+mysql> SELECT employee_id, last_name, salary, ROUND(salary * 1.155, 0) AS "New Salary" FROM employees;
++-------------+-----------+--------+------------+
+| employee_id | last_name | salary | New Salary |
++-------------+-----------+--------+------------+
+|         100 | King      |  24000 |      27720 |
+|         101 | Kochhar   |  17000 |      19635 |
+|         102 | De Haan   |  17000 |      19635 |
+|         103 | Hunold    |   9000 |      10395 |
+|         104 | Ernst     |   6000 |       6930 |
+|         107 | Lorentz   |   4200 |       4851 |
+|         124 | Mourgos   |   5800 |       6699 |
+|         141 | Rajs      |   3500 |       4043 |
+|         142 | Davies    |   3100 |       3581 |
+|         143 | Matos     |   2600 |       3003 |
+|         144 | Vargas    |   2500 |       2888 |
+|         149 | Zlotkey   |  10500 |      12128 |
+|         174 | Abel      |  11000 |      12705 |
+|         176 | Taylor    |   8600 |       9933 |
+|         178 | Grant     |   7000 |       8085 |
+|         200 | Whalen    |   4400 |       5082 |
+|         201 | Hartstein |  13000 |      15015 |
+|         202 | Fay       |   6000 |       6930 |
+|         205 | Higgins   |  12000 |      13860 |
+|         206 | Gietz     |   8300 |       9587 |
++-------------+-----------+--------+------------+
+20 rows in set (0.00 sec)
+NOTE: An alias with a space must be quoted ("New Salary" or `New Salary`).
+
+LAB 8  For each employee: <last name> earns <salary> monthly but wants <3 times salary>. Label the column Dream Salaries.
+mysql> SELECT CONCAT(last_name, ' earns ', salary, ' monthly but wants ', salary * 3) AS "Dream Salaries" FROM employees;
++-----------------------------------------------+
+| Dream Salaries                                |
++-----------------------------------------------+
+| King earns 24000 monthly but wants 72000      |
+| Kochhar earns 17000 monthly but wants 51000   |
+| De Haan earns 17000 monthly but wants 51000   |
+| Hunold earns 9000 monthly but wants 27000     |
+| Ernst earns 6000 monthly but wants 18000      |
+| Lorentz earns 4200 monthly but wants 12600    |
+| Mourgos earns 5800 monthly but wants 17400    |
+| Rajs earns 3500 monthly but wants 10500       |
+| Davies earns 3100 monthly but wants 9300      |
+| Matos earns 2600 monthly but wants 7800       |
+| Vargas earns 2500 monthly but wants 7500      |
+| Zlotkey earns 10500 monthly but wants 31500   |
+| Abel earns 11000 monthly but wants 33000      |
+| Taylor earns 8600 monthly but wants 25800     |
+| Grant earns 7000 monthly but wants 21000      |
+| Whalen earns 4400 monthly but wants 13200     |
+| Hartstein earns 13000 monthly but wants 39000 |
+| Fay earns 6000 monthly but wants 18000        |
+| Higgins earns 12000 monthly but wants 36000   |
+| Gietz earns 8300 monthly but wants 24900      |
++-----------------------------------------------+
+20 rows in set (0.00 sec)
+Oracle: SELECT last_name || ' earns ' || salary || ' monthly but wants ' || salary * 3 AS "Dream Salaries" FROM employees;
+NOTE: In MySQL || means OR, so use CONCAT.
+
+LAB 9  Display the last name and salary for all employees, salary 15 characters long, left-padded with $. Label the column SALARY.
+mysql> SELECT last_name, LPAD(salary, 15, '$') AS SALARY FROM employees;
++-----------+-----------------+
+| last_name | SALARY          |
++-----------+-----------------+
+| King      | $$$$$$$$$$24000 |
+| Kochhar   | $$$$$$$$$$17000 |
+| De Haan   | $$$$$$$$$$17000 |
+| Hunold    | $$$$$$$$$$$9000 |
+| Ernst     | $$$$$$$$$$$6000 |
+| Lorentz   | $$$$$$$$$$$4200 |
+| Mourgos   | $$$$$$$$$$$5800 |
+| Rajs      | $$$$$$$$$$$3500 |
+| Davies    | $$$$$$$$$$$3100 |
+| Matos     | $$$$$$$$$$$2600 |
+| Vargas    | $$$$$$$$$$$2500 |
+| Zlotkey   | $$$$$$$$$$10500 |
+| Abel      | $$$$$$$$$$11000 |
+| Taylor    | $$$$$$$$$$$8600 |
+| Grant     | $$$$$$$$$$$7000 |
+| Whalen    | $$$$$$$$$$$4400 |
+| Hartstein | $$$$$$$$$$13000 |
+| Fay       | $$$$$$$$$$$6000 |
+| Higgins   | $$$$$$$$$$12000 |
+| Gietz     | $$$$$$$$$$$8300 |
++-----------+-----------------+
+20 rows in set (0.00 sec)
+
+LAB 10  Display each employee's last name, hire date and salary review date, which is the first Monday after six months of service. Label the column REVIEW. Format like 'Monday, the Thirty-First of July, 2000'.
+mysql> SELECT last_name, hire_date,
+    ->        DATE_FORMAT(DATE_ADD(DATE_ADD(hire_date, INTERVAL 6 MONTH),
+    ->                             INTERVAL 7 - WEEKDAY(DATE_ADD(hire_date, INTERVAL 6 MONTH)) DAY),
+    ->                    '%W, the %D of %M, %Y') AS REVIEW
+    -> FROM employees;
++-----------+------------+-------------------------------------+
+| last_name | hire_date  | REVIEW                              |
++-----------+------------+-------------------------------------+
+| King      | 1987-06-17 | Monday, the 21st of December, 1987  |
+| Kochhar   | 1989-09-21 | Monday, the 26th of March, 1990     |
+| De Haan   | 1993-01-13 | Monday, the 19th of July, 1993      |
+| Hunold    | 1990-01-03 | Monday, the 9th of July, 1990       |
+| Ernst     | 1991-05-21 | Monday, the 25th of November, 1991  |
+| Lorentz   | 1999-02-07 | Monday, the 9th of August, 1999     |
+| Mourgos   | 1999-11-16 | Monday, the 22nd of May, 2000       |
+| Rajs      | 1995-10-17 | Monday, the 22nd of April, 1996     |
+| Davies    | 1997-01-29 | Monday, the 4th of August, 1997     |
+| Matos     | 1998-03-15 | Monday, the 21st of September, 1998 |
+| Vargas    | 1998-07-09 | Monday, the 11th of January, 1999   |
+| Zlotkey   | 2000-01-29 | Monday, the 31st of July, 2000      |
+| Abel      | 1996-05-11 | Monday, the 18th of November, 1996  |
+| Taylor    | 1998-03-24 | Monday, the 28th of September, 1998 |
+| Grant     | 1999-05-24 | Monday, the 29th of November, 1999  |
+| Whalen    | 1987-09-17 | Monday, the 21st of March, 1988     |
+| Hartstein | 1996-02-17 | Monday, the 19th of August, 1996    |
+| Fay       | 1997-08-17 | Monday, the 23rd of February, 1998  |
+| Higgins   | 1994-06-07 | Monday, the 12th of December, 1994  |
+| Gietz     | 1994-06-07 | Monday, the 12th of December, 1994  |
++-----------+------------+-------------------------------------+
+20 rows in set (0.00 sec)
+Oracle: SELECT last_name, hire_date,
+               TO_CHAR(NEXT_DAY(ADD_MONTHS(hire_date, 6), 'MONDAY'),
+                       'fmDay, "the" Ddspth "of" Month, YYYY') AS REVIEW
+        FROM employees;
+NOTE: WEEKDAY() numbers Monday = 0 ... Sunday = 6, so adding 7 - WEEKDAY(d) days gives the
+      next Monday strictly after d. MySQL's %D prints 31st; only Oracle can spell out 'Thirty-
+      First' (Ddspth).
+
+LAB 11  Display the last name, hire date and day of the week on which the employee started. Label the column DAY. Order by the day of the week starting with Monday.
+mysql> SELECT last_name, hire_date, DAYNAME(hire_date) AS DAY FROM employees ORDER BY WEEKDAY(hire_date), last_name;
++-----------+------------+-----------+
+| last_name | hire_date  | DAY       |
++-----------+------------+-----------+
+| Grant     | 1999-05-24 | Monday    |
+| Ernst     | 1991-05-21 | Tuesday   |
+| Gietz     | 1994-06-07 | Tuesday   |
+| Higgins   | 1994-06-07 | Tuesday   |
+| Mourgos   | 1999-11-16 | Tuesday   |
+| Rajs      | 1995-10-17 | Tuesday   |
+| Taylor    | 1998-03-24 | Tuesday   |
+| Davies    | 1997-01-29 | Wednesday |
+| De Haan   | 1993-01-13 | Wednesday |
+| Hunold    | 1990-01-03 | Wednesday |
+| King      | 1987-06-17 | Wednesday |
+| Kochhar   | 1989-09-21 | Thursday  |
+| Vargas    | 1998-07-09 | Thursday  |
+| Whalen    | 1987-09-17 | Thursday  |
+| Abel      | 1996-05-11 | Saturday  |
+| Hartstein | 1996-02-17 | Saturday  |
+| Zlotkey   | 2000-01-29 | Saturday  |
+| Fay       | 1997-08-17 | Sunday    |
+| Lorentz   | 1999-02-07 | Sunday    |
+| Matos     | 1998-03-15 | Sunday    |
++-----------+------------+-----------+
+20 rows in set (0.00 sec)
+Oracle: SELECT last_name, hire_date, TO_CHAR(hire_date, 'DAY') AS DAY FROM employees ORDER BY TO_CHAR(hire_date - 1, 'd');
+NOTE: ORDER BY DAY would sort the names alphabetically (Friday first). WEEKDAY gives Monday =
+      0, so it sorts in week order. last_name only breaks ties.
+
+LAB 12  Open-ended: take a real-world situation, (1) draw its conceptual design (ER diagram), (2) convert it to a relational database.
+Example: LIBRARY
+ER design (Chen notation):
+  Entities:   MEMBER (member_id [key], name, phone {multivalued}, join_date)
+              BOOK   (book_id [key], title, publisher, year)
+              AUTHOR (author_id [key], name)
+              COPY   (weak entity: copy_no [partial key], shelf)  -- identified by BOOK
+  Relationships: WRITES  AUTHOR M:N BOOK
+                 HAS     BOOK 1:N COPY (identifying, total participation of COPY)
+                 BORROWS MEMBER M:N COPY with attributes issue_date, due_date, return_date
+Relational schema (primary keys first, FK -> parent):
+  member(member_id PK, name, join_date)
+  member_phone(member_id FK->member, phone, PK(member_id, phone))        -- multivalued attribute
+  book(book_id PK, title, publisher, year)
+  author(author_id PK, name)
+  writes(author_id FK->author, book_id FK->book, PK(author_id, book_id)) -- M:N becomes a table
+  copy(book_id FK->book, copy_no, shelf, PK(book_id, copy_no))           -- weak entity: owner key + partial key
+  borrows(member_id FK->member, book_id, copy_no, issue_date, due_date, return_date,
+          PK(member_id, book_id, copy_no, issue_date), FK(book_id, copy_no)->copy)
+
+CREATE TABLE book (book_id INT PRIMARY KEY, title VARCHAR(100) NOT NULL, publisher VARCHAR(50), year INT) ENGINE=InnoDB;
+CREATE TABLE copy (book_id INT, copy_no INT, shelf VARCHAR(10), PRIMARY KEY (book_id, copy_no),
+                   FOREIGN KEY (book_id) REFERENCES book(book_id) ON DELETE CASCADE) ENGINE=InnoDB;
+
+LAB 13  Project based learning: a complete RDBMS (DDL + DML) with a Python front end (e.g. Library, Retail store, Student information, Hospital, Hotel, Inventory, Banking...).
+Minimal Python connectivity (pip install mysql-connector-python):
+import mysql.connector
+con = mysql.connector.connect(host='localhost', user='root', password='****', database='company')
+cur = con.cursor()
+cur.execute("SELECT ENAME, SAL FROM EMP WHERE DEPTNO = %s", (10,))   # parameters, never string-joining
+for ename, sal in cur.fetchall():
+    print(ename, sal)
+cur.execute("UPDATE EMP SET SAL = SAL + 500 WHERE EMPNO = %s", (11,))
+con.commit()            # DML needs commit when autocommit is off
+con.close()
+
+================================================================================================
+PART D: LAB ASSIGNMENT 1
+================================================================================================
+
+------------------------------------------------------------------------------------------------
+Q1. COURSE / STUDENT / INSTALLMENT DATABASE
+------------------------------------------------------------------------------------------------
+CREATE TABLE Course (course_no CHAR(4) PRIMARY KEY, course_name VARCHAR(20));
+CREATE TABLE Course_fee (course_no CHAR(4), full_part CHAR(1) CHECK (full_part IN ('F','P')), fees INT,
+                         UNIQUE (course_no, full_part), FOREIGN KEY (course_no) REFERENCES Course(course_no));
+CREATE TABLE Student (prospectus_no INT PRIMARY KEY, name VARCHAR(20), address VARCHAR(30), phone_no BIGINT, D_O_B DATE,
+                      total_amt DECIMAL(10,2), amt_paid DECIMAL(10,2), installment CHAR(1) CHECK (installment IN ('I','F')));
+CREATE TABLE Installment (prospectus_no INT, installment_amt DECIMAL(10,2), due_dt DATE, paid CHAR(1) CHECK (paid IN ('P','U')),
+                          UNIQUE (prospectus_no, due_dt),
+                          FOREIGN KEY (prospectus_no) REFERENCES Student(prospectus_no) ON DELETE CASCADE);
+CREATE TABLE Course_taken (prospectus_no INT, course_no CHAR(4), start_dt DATE, full_part CHAR(1), time_slot CHAR(2), performance VARCHAR(20),
+                           FOREIGN KEY (prospectus_no) REFERENCES Student(prospectus_no), FOREIGN KEY (course_no) REFERENCES Course(course_no));
+INSERT INTO Course VALUES ('C001','Oracle'),('C002','Unix'),('C003','Java'),('C004','DBMS');
+INSERT INTO Course_fee VALUES ('C001','F',12000),('C001','P',8000),('C002','F',9000),('C002','P',6000),('C003','F',15000),('C004','P',5000);
+INSERT INTO Student VALUES (1,'Aman','Noida',9810011111,'2005-04-12',12000,12000,'F'),(2,'Riya','Delhi',9810022222,'2005-09-01',8000,4000,'I'),
+  (3,'Arjun','Agra',9810033333,'2004-12-30',9000,3000,'I'),(4,'Kabir','Noida',9810044444,'2005-02-17',15000,15000,'F'),(5,'Aisha','Pune',9810055555,'2005-07-07',6000,2000,'I');
+INSERT INTO Installment VALUES (2,4000,'2026-11-30','U'),(3,3000,'2026-11-20','P'),(3,3000,'2026-12-20','U'),(5,2000,'2026-11-28','U'),(5,2000,'2026-12-28','U');
+INSERT INTO Course_taken VALUES (1,'C001','2026-11-02','F','M1','Good'),(2,'C001','2026-11-05','P','E1','Average'),(3,'C002','2026-10-10','F','M2','Good'),
+  (4,'C003','2026-11-09','F','E2','Excellent'),(5,'C002','2026-11-12','P','M1','Good');
+NOTE: Sample rows were added so the queries can be tried; 'current month' answers depend on
+      the day you run them. Oracle number(10) / number(10,2) become INT / DECIMAL(10,2) in
+      MySQL.
+
+1.  Retrieve name and course no of all the students.
+mysql> SELECT s.name, ct.course_no FROM Student s JOIN Course_taken ct ON s.prospectus_no = ct.prospectus_no;
++-------+-----------+
+| name  | course_no |
++-------+-----------+
+| Aman  | C001      |
+| Riya  | C001      |
+| Arjun | C002      |
+| Kabir | C003      |
+| Aisha | C002      |
++-------+-----------+
+5 rows in set (0.00 sec)
+
+2.  List the names of students who have paid the full amount at the time of admission.
+mysql> SELECT name FROM Student WHERE installment = 'F';
++-------+
+| name  |
++-------+
+| Aman  |
+| Kabir |
++-------+
+2 rows in set (0.00 sec)
+NOTE: installment 'F' = paid in full, 'I' = paying in installments. Also acceptable: WHERE
+      amt_paid = total_amt.
+
+3.  Find the names of students starting with A.
+mysql> SELECT name FROM Student WHERE name LIKE 'A%';
++-------+
+| name  |
++-------+
+| Aman  |
+| Arjun |
+| Aisha |
++-------+
+3 rows in set (0.00 sec)
+
+4.  Print the names of students whose total amount is not equal to amount paid (amount still due).
+mysql> SELECT name, total_amt, amt_paid FROM Student WHERE total_amt <> amt_paid;
++-------+-----------+----------+
+| name  | total_amt | amt_paid |
++-------+-----------+----------+
+| Riya  |      8000 |     4000 |
+| Arjun |      9000 |     3000 |
+| Aisha |      6000 |     2000 |
++-------+-----------+----------+
+3 rows in set (0.00 sec)
+
+5.  Count the number of students who have joined in the current year, current month.
+mysql> SELECT COUNT(DISTINCT prospectus_no) FROM Course_taken WHERE YEAR(start_dt) = YEAR(CURDATE()) AND MONTH(start_dt) = MONTH(CURDATE());
++-------------------------------+
+| COUNT(DISTINCT prospectus_no) |
++-------------------------------+
+|                             4 |
++-------------------------------+
+1 row in set (0.00 sec)
+NOTE: Output shown for a run in November 2026.
+
+6.  Determine the maximum and minimum course fees.
+mysql> SELECT MAX(fees), MIN(fees) FROM Course_fee;
++-----------+-----------+
+| MAX(fees) | MIN(fees) |
++-----------+-----------+
+|     15000 |      5000 |
++-----------+-----------+
+1 row in set (0.00 sec)
+
+7.  Increase the fee of Oracle by 50%.
+mysql> UPDATE Course_fee SET fees = fees * 1.5 WHERE course_no = (SELECT course_no FROM Course WHERE course_name = 'Oracle');
+Query OK, 2 rows affected (0.00 sec)
+Rows matched: 2  Changed: 2  Warnings: 0
+
+8.  Print the details of courses whose fees are between 5000 and 10000.
+mysql> SELECT c.course_no, c.course_name, f.full_part, f.fees FROM Course c JOIN Course_fee f ON c.course_no = f.course_no WHERE f.fees BETWEEN 5000 AND 10000;
++-----------+-------------+-----------+------+
+| course_no | course_name | full_part | fees |
++-----------+-------------+-----------+------+
+| C002      | Unix        | F         | 9000 |
+| C002      | Unix        | P         | 6000 |
+| C004      | DBMS        | P         | 5000 |
++-----------+-------------+-----------+------+
+3 rows in set (0.00 sec)
+
+9.  Display the admission date in Date, Month, Year format.
+mysql> SELECT s.name, DAY(ct.start_dt) AS Date, MONTH(ct.start_dt) AS Month, YEAR(ct.start_dt) AS Year FROM Student s JOIN Course_taken ct ON s.prospectus_no = ct.prospectus_no;
++-------+------+-------+------+
+| name  | Date | Month | Year |
++-------+------+-------+------+
+| Aman  |    2 |    11 | 2026 |
+| Riya  |    5 |    11 | 2026 |
+| Arjun |   10 |    10 | 2026 |
+| Kabir |    9 |    11 | 2026 |
+| Aisha |   12 |    11 | 2026 |
++-------+------+-------+------+
+5 rows in set (0.00 sec)
+
+10.  Find out in which course the maximum number of students have taken admission.
+mysql> SELECT course_no, COUNT(*) AS students FROM Course_taken GROUP BY course_no ORDER BY students DESC LIMIT 1;
++-----------+----------+
+| course_no | students |
++-----------+----------+
+| C002      |        2 |
++-----------+----------+
+1 row in set (0.00 sec)
+NOTE: If two courses tie, LIMIT 1 shows only one of them; HAVING COUNT(*) = (SELECT MAX(...))
+      would show both.
+
+11.  Change the course_name from Unix to Unix Operating System.
+mysql> UPDATE Course SET course_name = 'Unix Operating System' WHERE course_name = 'Unix';
+Query OK, 1 row affected (0.00 sec)
+Rows matched: 1  Changed: 1  Warnings: 0
+
+12.  Display the admission date in DD-MONTH-YYYY format.
+mysql> SELECT name, DATE_FORMAT(start_dt, '%d-%M-%Y') AS admission FROM Student s JOIN Course_taken ct ON s.prospectus_no = ct.prospectus_no;
++-------+------------------+
+| name  | admission        |
++-------+------------------+
+| Aman  | 02-November-2026 |
+| Riya  | 05-November-2026 |
+| Arjun | 10-October-2026  |
+| Kabir | 09-November-2026 |
+| Aisha | 12-November-2026 |
++-------+------------------+
+5 rows in set (0.00 sec)
+NOTE: Oracle: TO_CHAR(start_dt, 'DD-MONTH-YYYY').
+
+13.  Get the sum of amount to be collected from students in this month.
+mysql> SELECT SUM(installment_amt) FROM Installment WHERE paid = 'U' AND YEAR(due_dt) = YEAR(CURDATE()) AND MONTH(due_dt) = MONTH(CURDATE());
++----------------------+
+| SUM(installment_amt) |
++----------------------+
+|                 6000 |
++----------------------+
+1 row in set (0.00 sec)
+
+14.  Find out in which course the maximum number of students have taken admission in the current month.
+mysql> SELECT course_no, COUNT(*) AS students FROM Course_taken WHERE YEAR(start_dt) = YEAR(CURDATE()) AND MONTH(start_dt) = MONTH(CURDATE()) GROUP BY course_no ORDER BY students DESC LIMIT 1;
++-----------+----------+
+| course_no | students |
++-----------+----------+
+| C001      |        2 |
++-----------+----------+
+1 row in set (0.00 sec)
+
+15.  Select the students who have not yet paid the full amount of fees.
+mysql> SELECT name, total_amt - amt_paid AS due FROM Student WHERE amt_paid < total_amt;
++-------+------+
+| name  | due  |
++-------+------+
+| Riya  | 4000 |
+| Arjun | 6000 |
+| Aisha | 4000 |
++-------+------+
+3 rows in set (0.00 sec)
+
+------------------------------------------------------------------------------------------------
+Q2. SUPPLIER - PARTS - PROJECT DATABASE (SPJ)
+------------------------------------------------------------------------------------------------
+CREATE TABLE SUPPLIER (SNO CHAR(2) PRIMARY KEY, SNAME VARCHAR(10), STATUS INT, CITY VARCHAR(10));
+CREATE TABLE PARTS (PNO CHAR(2) PRIMARY KEY, PNAME VARCHAR(10), COLOR VARCHAR(10), WEIGHT INT, CITY VARCHAR(10));
+CREATE TABLE PROJECT (JNO CHAR(2) PRIMARY KEY, JNAME VARCHAR(10), CITY VARCHAR(10));
+CREATE TABLE SPJ (SNO CHAR(2), PNO CHAR(2), JNO CHAR(2), QTY INT, PRIMARY KEY (SNO, PNO, JNO),
+                  FOREIGN KEY (SNO) REFERENCES SUPPLIER(SNO), FOREIGN KEY (PNO) REFERENCES PARTS(PNO), FOREIGN KEY (JNO) REFERENCES PROJECT(JNO));
+INSERT INTO SUPPLIER VALUES ('S1','Smith',20,'London'),('S2','Jones',10,'Paris'),('S3','Blake',30,'Paris'),('S4','Clark',20,'London'),('S5','Adams',30,'Athens');
+INSERT INTO PARTS VALUES ('P1','Nut','Red',12,'London'),('P2','Bolt','Green',17,'Paris'),('P3','Screw','Blue',17,'Oslo'),('P4','Screw','Red',14,'London'),('P5','Cam','Blue',12,'Paris'),('P6','Cog','Red',19,'London');
+INSERT INTO PROJECT VALUES ('J1','Sorter','Paris'),('J2','Display','Rome'),('J3','OCR','Athens'),('J4','Console','Athens'),('J5','RAID','London'),('J6','EDS','Oslo'),('J7','Tape','London');
+INSERT INTO SPJ VALUES ('S1','P1','J1',200),('S1','P1','J4',700),('S2','P3','J1',400),('S2','P3','J2',200),('S2','P3','J3',200),('S2','P3','J4',500),('S2','P3','J5',600),('S2','P3','J6',400),('S2','P3','J7',800),('S2','P5','J2',100),('S3','P3','J1',200),('S3','P4','J2',500),('S4','P6','J3',300),('S4','P6','J7',300),('S5','P2','J2',200),('S5','P2','J4',100),('S5','P5','J5',500),('S5','P5','J7',100),('S5','P6','J2',200),('S5','P1','J4',100),('S5','P3','J4',200),('S5','P4','J4',800),('S5','P5','J4',400),('S5','P6','J4',500);
+NOTE: This is the classic C.J. Date supplier-parts-projects data.
+
+1.  Get SNO values for suppliers who supply project J1.
+mysql> SELECT DISTINCT SNO FROM SPJ WHERE JNO = 'J1';
++-----+
+| SNO |
++-----+
+| S1  |
+| S2  |
+| S3  |
++-----+
+3 rows in set (0.00 sec)
+
+2.  Get SNO values for suppliers who supply project J1 with part P1.
+mysql> SELECT DISTINCT SNO FROM SPJ WHERE JNO = 'J1' AND PNO = 'P1';
++-----+
+| SNO |
++-----+
+| S1  |
++-----+
+1 row in set (0.00 sec)
+
+3.  Get JNAME values for projects supplied by supplier S1.
+mysql> SELECT JNAME FROM PROJECT WHERE JNO IN (SELECT JNO FROM SPJ WHERE SNO = 'S1');
++---------+
+| JNAME   |
++---------+
+| Sorter  |
+| Console |
++---------+
+2 rows in set (0.00 sec)
+
+4.  Get COLOR values for parts supplied by supplier S1.
+mysql> SELECT DISTINCT COLOR FROM PARTS WHERE PNO IN (SELECT PNO FROM SPJ WHERE SNO = 'S1');
++-------+
+| COLOR |
++-------+
+| Red   |
++-------+
+1 row in set (0.00 sec)
+
+5.  Get PNO values for parts supplied to any project in London.
+mysql> SELECT DISTINCT PNO FROM SPJ WHERE JNO IN (SELECT JNO FROM PROJECT WHERE CITY = 'London');
++-----+
+| PNO |
++-----+
+| P3  |
+| P6  |
+| P5  |
++-----+
+3 rows in set (0.00 sec)
+
+6.  Get SNO values for suppliers who supply project J1 with a red part.
+mysql> SELECT DISTINCT SNO FROM SPJ WHERE JNO = 'J1' AND PNO IN (SELECT PNO FROM PARTS WHERE COLOR = 'Red');
++-----+
+| SNO |
++-----+
+| S1  |
++-----+
+1 row in set (0.00 sec)
+NOTE: Use IN, not =: the subquery returns 3 red parts, and = would give ERROR 1242 (Subquery
+      returns more than 1 row).
+
+7.  Get SNO values for suppliers who supply a London or Paris project with a red part.
+mysql> SELECT DISTINCT SNO FROM SPJ WHERE JNO IN (SELECT JNO FROM PROJECT WHERE CITY IN ('London', 'Paris')) AND PNO IN (SELECT PNO FROM PARTS WHERE COLOR = 'Red');
++-----+
+| SNO |
++-----+
+| S1  |
+| S4  |
++-----+
+2 rows in set (0.00 sec)
+
+8.  Get PNO values for parts supplied to any project by a supplier in the same city.
+mysql> SELECT DISTINCT SPJ.PNO FROM SPJ JOIN SUPPLIER S ON SPJ.SNO = S.SNO JOIN PROJECT J ON SPJ.JNO = J.JNO WHERE S.CITY = J.CITY;
++-----+
+| PNO |
++-----+
+| P3  |
+| P6  |
+| P1  |
+| P2  |
+| P4  |
+| P5  |
++-----+
+6 rows in set (0.00 sec)
+
+9.  Get PNO values for parts supplied to any project in London by a supplier in London.
+mysql> SELECT DISTINCT SPJ.PNO FROM SPJ JOIN SUPPLIER S ON SPJ.SNO = S.SNO JOIN PROJECT J ON SPJ.JNO = J.JNO WHERE S.CITY = 'London' AND J.CITY = 'London';
++-----+
+| PNO |
++-----+
+| P6  |
++-----+
+1 row in set (0.00 sec)
+
+10.  Get JNO values for projects supplied by at least one supplier not in the same city.
+mysql> SELECT DISTINCT SPJ.JNO FROM SPJ JOIN SUPPLIER S ON SPJ.SNO = S.SNO JOIN PROJECT J ON SPJ.JNO = J.JNO WHERE S.CITY <> J.CITY;
++-----+
+| JNO |
++-----+
+| J1  |
+| J4  |
+| J2  |
+| J3  |
+| J5  |
+| J6  |
+| J7  |
++-----+
+7 rows in set (0.00 sec)
+
+11.  Get all pairs of city values such that a supplier in the first city supplies a project in the second city.
+mysql> SELECT DISTINCT S.CITY AS supplier_city, J.CITY AS project_city FROM SPJ JOIN SUPPLIER S ON SPJ.SNO = S.SNO JOIN PROJECT J ON SPJ.JNO = J.JNO;
++---------------+--------------+
+| supplier_city | project_city |
++---------------+--------------+
+| London        | Paris        |
+| London        | Athens       |
+| Paris         | Paris        |
+| Paris         | Rome         |
+| Paris         | Athens       |
+| Paris         | London       |
+| Paris         | Oslo         |
+| London        | London       |
+| Athens        | Athens       |
+| Athens        | Rome         |
+| Athens        | London       |
++---------------+--------------+
+11 rows in set (0.00 sec)
+
+12.  Get SNO values for suppliers who supply the same part to all projects.
+mysql> SELECT SNO, PNO FROM SPJ GROUP BY SNO, PNO HAVING COUNT(DISTINCT JNO) = (SELECT COUNT(*) FROM PROJECT);
++-----+-----+
+| SNO | PNO |
++-----+-----+
+| S2  | P3  |
++-----+-----+
+1 row in set (0.00 sec)
+NOTE: 'All projects' = relational division: count the projects each (supplier, part) pair
+      reaches and compare with the total number of projects.
+
+13.  Get PNO values for parts supplied to all projects in London.
+mysql> SELECT PNO FROM SPJ WHERE JNO IN (SELECT JNO FROM PROJECT WHERE CITY = 'London') GROUP BY PNO HAVING COUNT(DISTINCT JNO) = (SELECT COUNT(*) FROM PROJECT WHERE CITY = 'London');
++-----+
+| PNO |
++-----+
+| P3  |
+| P5  |
++-----+
+2 rows in set (0.00 sec)
+NOTE: Textbook form with double NOT EXISTS: SELECT PNO FROM PARTS p WHERE NOT EXISTS (SELECT *
+      FROM PROJECT j WHERE j.CITY = 'London' AND NOT EXISTS (SELECT * FROM SPJ x WHERE x.PNO =
+      p.PNO AND x.JNO = j.JNO));
+
+14.  Get SNAME values for suppliers who supply at least one red part to any project.
+mysql> SELECT SNAME FROM SUPPLIER WHERE SNO IN (SELECT SNO FROM SPJ WHERE PNO IN (SELECT PNO FROM PARTS WHERE COLOR = 'Red'));
++-------+
+| SNAME |
++-------+
+| Smith |
+| Blake |
+| Clark |
+| Adams |
++-------+
+4 rows in set (0.00 sec)
+
+15.  Get the total quantity of part P1 supplied by supplier S1.
+mysql> SELECT SUM(QTY) FROM SPJ WHERE SNO = 'S1' AND PNO = 'P1';
++----------+
+| SUM(QTY) |
++----------+
+|      900 |
++----------+
+1 row in set (0.00 sec)
+
+16.  Get the total number of projects supplied by supplier S3.
+mysql> SELECT COUNT(DISTINCT JNO) FROM SPJ WHERE SNO = 'S3';
++---------------------+
+| COUNT(DISTINCT JNO) |
++---------------------+
+|                   2 |
++---------------------+
+1 row in set (0.00 sec)
+
+17.  Change the color of all red parts to orange.
+mysql> UPDATE PARTS SET COLOR = 'Orange' WHERE COLOR = 'Red';
+Query OK, 3 rows affected (0.00 sec)
+Rows matched: 3  Changed: 3  Warnings: 0
+
+18.  Get SNAME values for suppliers who supply to both projects J1 and J2.
+mysql> SELECT SNAME FROM SUPPLIER WHERE SNO IN (SELECT SNO FROM SPJ WHERE JNO = 'J1') AND SNO IN (SELECT SNO FROM SPJ WHERE JNO = 'J2');
++-------+
+| SNAME |
++-------+
+| Jones |
+| Blake |
++-------+
+2 rows in set (0.00 sec)
+NOTE: WHERE JNO = 'J1' AND JNO = 'J2' is always false: one row can't have two values.
+
+19.  Get all (city, pno, city) triples such that a supplier in the first city supplies the part to a project in the second city.
+mysql> SELECT DISTINCT S.CITY AS supplier_city, SPJ.PNO, J.CITY AS project_city FROM SPJ JOIN SUPPLIER S ON SPJ.SNO = S.SNO JOIN PROJECT J ON SPJ.JNO = J.JNO;
++---------------+-----+--------------+
+| supplier_city | PNO | project_city |
++---------------+-----+--------------+
+| London        | P1  | Paris        |
+| London        | P1  | Athens       |
+| Paris         | P3  | Paris        |
+| Paris         | P3  | Rome         |
+| Paris         | P3  | Athens       |
+| Paris         | P3  | London       |
+| Paris         | P3  | Oslo         |
+| Paris         | P5  | Rome         |
+| Paris         | P4  | Rome         |
+| London        | P6  | Athens       |
+| London        | P6  | London       |
+| Athens        | P1  | Athens       |
+| Athens        | P2  | Rome         |
+| Athens        | P2  | Athens       |
+| Athens        | P3  | Athens       |
+| Athens        | P4  | Athens       |
+| Athens        | P5  | Athens       |
+| Athens        | P5  | London       |
+| Athens        | P6  | Rome         |
+| Athens        | P6  | Athens       |
++---------------+-----+--------------+
+20 rows in set (0.00 sec)
+
+20.  Get JNAME values for the projects supplied by supplier 'XYZ' (here: Smith).
+mysql> SELECT DISTINCT J.JNAME FROM SPJ JOIN SUPPLIER S ON SPJ.SNO = S.SNO JOIN PROJECT J ON SPJ.JNO = J.JNO WHERE S.SNAME = 'Smith';
++---------+
+| JNAME   |
++---------+
+| Sorter  |
+| Console |
++---------+
+2 rows in set (0.00 sec)
+
+------------------------------------------------------------------------------------------------
+Q3. EMPLOYEE QUERIES (EMP / DEPT / SALGRADE)
+------------------------------------------------------------------------------------------------
+'Create the required tables': the classic EMP / DEPT / SALGRADE tables (the questions mention Dallas, grade
+and 1983, which are from this data set). SYSTEMS and MARKETING departments were added because two questions
+need them; OPERATIONS has no employees.
+CREATE TABLE DEPT (DEPTNO INT PRIMARY KEY, DNAME VARCHAR(14), LOC VARCHAR(13));
+CREATE TABLE EMP (EMPNO INT PRIMARY KEY, ENAME VARCHAR(10), JOB VARCHAR(10), MGR INT, HIREDATE DATE, SAL INT, COMM INT, DEPTNO INT,
+                  FOREIGN KEY (DEPTNO) REFERENCES DEPT(DEPTNO));
+CREATE TABLE SALGRADE (GRADE INT, LOSAL INT, HISAL INT);
+INSERT INTO DEPT VALUES (10,'ACCOUNTING','NEW YORK'),(20,'RESEARCH','DALLAS'),(30,'SALES','CHICAGO'),(40,'OPERATIONS','BOSTON'),(50,'SYSTEMS','NOIDA'),(60,'MARKETING','DELHI');
+INSERT INTO EMP VALUES
+(7369,'SMITH','CLERK',7902,'1980-12-17',800,NULL,20),(7499,'ALLEN','SALESMAN',7698,'1981-02-20',1600,300,30),
+(7521,'WARD','SALESMAN',7698,'1981-02-22',1250,500,30),(7566,'JONES','MANAGER',7839,'1981-04-02',2975,NULL,20),
+(7654,'MARTIN','SALESMAN',7698,'1981-09-28',1250,1400,30),(7698,'BLAKE','MANAGER',7839,'1981-05-01',2850,NULL,30),
+(7782,'CLARK','MANAGER',7839,'1981-06-09',2450,NULL,10),(7788,'SCOTT','ANALYST',7566,'1982-12-09',3000,NULL,20),
+(7839,'KING','PRESIDENT',NULL,'1981-11-17',5000,NULL,10),(7844,'TURNER','SALESMAN',7698,'1981-09-08',1500,0,30),
+(7876,'ADAMS','CLERK',7788,'1983-01-12',1100,NULL,20),(7900,'JAMES','CLERK',7698,'1981-12-03',950,NULL,30),
+(7902,'FORD','ANALYST',7566,'1981-12-03',3000,NULL,20),(7934,'MILLER','CLERK',7782,'1982-01-23',1300,NULL,10),
+(7950,'RAVI','ANALYST',7839,'1983-03-10',2800,NULL,50),(7960,'NEHA','PROGRAMMER',7950,'1983-07-21',1900,NULL,50),
+(7980,'PRIYA','MANAGER',7839,'1982-05-04',2600,NULL,60),(7990,'KABIR','CLERK',7980,'1983-09-15',1000,NULL,60);
+INSERT INTO SALGRADE VALUES (1,700,1200),(2,1201,1400),(3,1401,2000),(4,2001,3000),(5,3001,9999);
+
+1.  Display each employee name and hire date of the SYSTEMS department.
+mysql> SELECT e.ENAME, e.HIREDATE FROM EMP e JOIN DEPT d ON e.DEPTNO = d.DEPTNO WHERE d.DNAME = 'SYSTEMS';
++-------+------------+
+| ENAME | HIREDATE   |
++-------+------------+
+| RAVI  | 1983-03-10 |
+| NEHA  | 1983-07-21 |
++-------+------------+
+2 rows in set (0.00 sec)
+
+2.  Write a query to calculate the length of service of each employee.
+mysql> SELECT ENAME, HIREDATE, TIMESTAMPDIFF(YEAR, HIREDATE, CURDATE()) AS years_of_service FROM EMP;
+NOTE: Output depends on today's date. Oracle: TRUNC(MONTHS_BETWEEN(SYSDATE, HIREDATE) / 12).
+      Days instead of years: DATEDIFF(CURDATE(), HIREDATE).
+
+3.  Find the second maximum salary of all employees.
+mysql> SELECT MAX(SAL) FROM EMP WHERE SAL < (SELECT MAX(SAL) FROM EMP);
++----------+
+| MAX(SAL) |
++----------+
+|     3000 |
++----------+
+1 row in set (0.00 sec)
+NOTE: MySQL alternative: SELECT DISTINCT SAL FROM EMP ORDER BY SAL DESC LIMIT 1, 1;
+
+4.  Display all employee names and department names in department name order.
+mysql> SELECT e.ENAME, d.DNAME FROM EMP e JOIN DEPT d ON e.DEPTNO = d.DEPTNO ORDER BY d.DNAME, e.ENAME;
++--------+------------+
+| ENAME  | DNAME      |
++--------+------------+
+| CLARK  | ACCOUNTING |
+| KING   | ACCOUNTING |
+| MILLER | ACCOUNTING |
+| KABIR  | MARKETING  |
+| PRIYA  | MARKETING  |
+| ADAMS  | RESEARCH   |
+| FORD   | RESEARCH   |
+| JONES  | RESEARCH   |
+| SCOTT  | RESEARCH   |
+| SMITH  | RESEARCH   |
+| ALLEN  | SALES      |
+| BLAKE  | SALES      |
+| JAMES  | SALES      |
+| MARTIN | SALES      |
+| TURNER | SALES      |
+| WARD   | SALES      |
+| NEHA   | SYSTEMS    |
+| RAVI   | SYSTEMS    |
++--------+------------+
+18 rows in set (0.00 sec)
+
+5.  Find the name of the lowest paid employee for each manager.
+mysql> SELECT e.MGR, e.ENAME, e.SAL FROM EMP e WHERE e.SAL = (SELECT MIN(SAL) FROM EMP WHERE MGR = e.MGR) ORDER BY e.MGR;
++------+--------+------+
+| MGR  | ENAME  | SAL  |
++------+--------+------+
+| 7566 | SCOTT  | 3000 |
+| 7566 | FORD   | 3000 |
+| 7698 | JAMES  |  950 |
+| 7782 | MILLER | 1300 |
+| 7788 | ADAMS  | 1100 |
+| 7839 | CLARK  | 2450 |
+| 7902 | SMITH  |  800 |
+| 7950 | NEHA   | 1900 |
+| 7980 | KABIR  | 1000 |
++------+--------+------+
+9 rows in set (0.00 sec)
+NOTE: Correlated subquery: for each employee, the inner query finds the minimum salary among
+      people with the same manager.
+
+6.  Display the department that has no employee.
+mysql> SELECT d.DEPTNO, d.DNAME FROM DEPT d LEFT JOIN EMP e ON e.DEPTNO = d.DEPTNO WHERE e.EMPNO IS NULL;
++--------+------------+
+| DEPTNO | DNAME      |
++--------+------------+
+|     40 | OPERATIONS |
++--------+------------+
+1 row in set (0.00 sec)
+NOTE: Also: WHERE NOT EXISTS (SELECT * FROM EMP e WHERE e.DEPTNO = d.DEPTNO). Avoid NOT IN
+      (SELECT DEPTNO FROM EMP) if DEPTNO can be NULL: then it returns nothing.
+
+7.  Find the employees who earn the maximum salary in each job type. Sort in descending order of salary.
+mysql> SELECT e.ENAME, e.JOB, e.SAL FROM EMP e WHERE e.SAL = (SELECT MAX(SAL) FROM EMP WHERE JOB = e.JOB) ORDER BY e.SAL DESC, e.ENAME;
++--------+------------+------+
+| ENAME  | JOB        | SAL  |
++--------+------------+------+
+| KING   | PRESIDENT  | 5000 |
+| FORD   | ANALYST    | 3000 |
+| SCOTT  | ANALYST    | 3000 |
+| JONES  | MANAGER    | 2975 |
+| NEHA   | PROGRAMMER | 1900 |
+| ALLEN  | SALESMAN   | 1600 |
+| MILLER | CLERK      | 1300 |
++--------+------------+------+
+7 rows in set (0.00 sec)
+
+8.  In which year did most people join the company? Display the year and number of employees.
+mysql> SELECT YEAR(HIREDATE) AS yr, COUNT(*) AS joined FROM EMP GROUP BY YEAR(HIREDATE) ORDER BY joined DESC LIMIT 1;
++------+--------+
+| yr   | joined |
++------+--------+
+| 1981 |     10 |
++------+--------+
+1 row in set (0.00 sec)
+
+9.  Display the details of employees who earn more than the average of their department.
+mysql> SELECT e.ENAME, e.SAL, e.DEPTNO FROM EMP e WHERE e.SAL > (SELECT AVG(SAL) FROM EMP WHERE DEPTNO = e.DEPTNO) ORDER BY e.DEPTNO;
++-------+------+--------+
+| ENAME | SAL  | DEPTNO |
++-------+------+--------+
+| KING  | 5000 |     10 |
+| JONES | 2975 |     20 |
+| SCOTT | 3000 |     20 |
+| FORD  | 3000 |     20 |
+| ALLEN | 1600 |     30 |
+| BLAKE | 2850 |     30 |
+| RAVI  | 2800 |     50 |
+| PRIYA | 2600 |     60 |
++-------+------+--------+
+8 rows in set (0.00 sec)
+
+10.  List the employees having salary between 10000 and 20000.
+mysql> SELECT ENAME, SAL FROM EMP WHERE SAL BETWEEN 10000 AND 20000;
+Empty set (0.00 sec)
+NOTE: In this classic data salaries are below 10000, so the set is empty; the query is what's
+      asked. Try BETWEEN 1000 AND 2000 to see rows.
+
+11.  Display all employees hired during 1983.
+mysql> SELECT ENAME, HIREDATE FROM EMP WHERE YEAR(HIREDATE) = 1983;
++-------+------------+
+| ENAME | HIREDATE   |
++-------+------------+
+| ADAMS | 1983-01-12 |
+| RAVI  | 1983-03-10 |
+| NEHA  | 1983-07-21 |
+| KABIR | 1983-09-15 |
++-------+------------+
+4 rows in set (0.00 sec)
+NOTE: Also: WHERE HIREDATE BETWEEN '1983-01-01' AND '1983-12-31'. (The assignment text repeats
+      part of Q9 after this question; that part is a copy slip.)
+
+12.  Update the salaries of all employees in the marketing department, hike it by 15%.
+mysql> UPDATE EMP SET SAL = SAL * 1.15 WHERE DEPTNO = (SELECT DEPTNO FROM DEPT WHERE DNAME = 'MARKETING');
+Query OK, 2 rows affected (0.00 sec)
+Rows matched: 2  Changed: 2  Warnings: 0
+
+13.  Get the gross salaries of all the employees.
+mysql> SELECT ENAME, SAL, COMM, SAL + IFNULL(COMM, 0) AS gross_salary FROM EMP;
++--------+-----------+------+--------------+
+| ENAME  | SAL       | COMM | gross_salary |
++--------+-----------+------+--------------+
+| SMITH  |       800 | NULL |          800 |
+| ALLEN  |      1600 |  300 |         1900 |
+| WARD   |      1250 |  500 |         1750 |
+| JONES  |      2975 | NULL |         2975 |
+| MARTIN |      1250 | 1400 |         2650 |
+| BLAKE  |      2850 | NULL |         2850 |
+| CLARK  |      2450 | NULL |         2450 |
+| SCOTT  |      3000 | NULL |         3000 |
+| KING   |      5000 | NULL |         5000 |
+| TURNER |      1500 |    0 |         1500 |
+| ADAMS  |      1100 | NULL |         1100 |
+| JAMES  |       950 | NULL |          950 |
+| FORD   |      3000 | NULL |         3000 |
+| MILLER |      1300 | NULL |         1300 |
+| RAVI   |      2800 | NULL |         2800 |
+| NEHA   |      1900 | NULL |         1900 |
+| PRIYA  | 2990.0000 | NULL |    2990.0000 |
+| KABIR  |      1150 | NULL |         1150 |
++--------+-----------+------+--------------+
+18 rows in set (0.00 sec)
+NOTE: SAL + COMM alone is NULL whenever COMM is NULL; IFNULL (Oracle: NVL) treats it as 0.
+
+14.  Get the names of employees and their managers.
+mysql> SELECT e.ENAME AS employee, m.ENAME AS manager FROM EMP e LEFT JOIN EMP m ON e.MGR = m.EMPNO ORDER BY e.ENAME;
++----------+---------+
+| employee | manager |
++----------+---------+
+| ADAMS    | SCOTT   |
+| ALLEN    | BLAKE   |
+| BLAKE    | KING    |
+| CLARK    | KING    |
+| FORD     | JONES   |
+| JAMES    | BLAKE   |
+| JONES    | KING    |
+| KABIR    | PRIYA   |
+| KING     | NULL    |
+| MARTIN   | BLAKE   |
+| MILLER   | CLARK   |
+| NEHA     | RAVI    |
+| PRIYA    | KING    |
+| RAVI     | KING    |
+| SCOTT    | JONES   |
+| SMITH    | FORD    |
+| TURNER   | BLAKE   |
+| WARD     | BLAKE   |
++----------+---------+
+18 rows in set (0.00 sec)
+NOTE: Self join: the same table twice with two aliases. LEFT JOIN keeps KING, who has no
+      manager.
+
+15.  Display the name, location and department name of all employees earning more than 1500.
+mysql> SELECT e.ENAME, d.LOC, d.DNAME FROM EMP e JOIN DEPT d ON e.DEPTNO = d.DEPTNO WHERE e.SAL > 1500;
++-------+----------+------------+
+| ENAME | LOC      | DNAME      |
++-------+----------+------------+
+| ALLEN | CHICAGO  | SALES      |
+| JONES | DALLAS   | RESEARCH   |
+| BLAKE | CHICAGO  | SALES      |
+| CLARK | NEW YORK | ACCOUNTING |
+| SCOTT | DALLAS   | RESEARCH   |
+| KING  | NEW YORK | ACCOUNTING |
+| FORD  | DALLAS   | RESEARCH   |
+| RAVI  | NOIDA    | SYSTEMS    |
+| NEHA  | NOIDA    | SYSTEMS    |
+| PRIYA | DELHI    | MARKETING  |
++-------+----------+------------+
+10 rows in set (0.00 sec)
+
+16.  Show all the employees in Dallas.
+mysql> SELECT e.ENAME FROM EMP e JOIN DEPT d ON e.DEPTNO = d.DEPTNO WHERE d.LOC = 'DALLAS';
++-------+
+| ENAME |
++-------+
+| SMITH |
+| JONES |
+| SCOTT |
+| ADAMS |
+| FORD  |
++-------+
+5 rows in set (0.00 sec)
+
+17.  List the employee name, job, salary, grade and department for all employees except clerks. Sort on employee name.
+mysql> SELECT e.ENAME, e.JOB, e.SAL, g.GRADE, d.DNAME FROM EMP e JOIN DEPT d ON e.DEPTNO = d.DEPTNO JOIN SALGRADE g ON e.SAL BETWEEN g.LOSAL AND g.HISAL WHERE e.JOB <> 'CLERK' ORDER BY e.ENAME;
++--------+------------+-----------+-------+------------+
+| ENAME  | JOB        | SAL       | GRADE | DNAME      |
++--------+------------+-----------+-------+------------+
+| ALLEN  | SALESMAN   |      1600 |     3 | SALES      |
+| BLAKE  | MANAGER    |      2850 |     4 | SALES      |
+| CLARK  | MANAGER    |      2450 |     4 | ACCOUNTING |
+| FORD   | ANALYST    |      3000 |     4 | RESEARCH   |
+| JONES  | MANAGER    |      2975 |     4 | RESEARCH   |
+| KING   | PRESIDENT  |      5000 |     5 | ACCOUNTING |
+| MARTIN | SALESMAN   |      1250 |     2 | SALES      |
+| NEHA   | PROGRAMMER |      1900 |     3 | SYSTEMS    |
+| PRIYA  | MANAGER    | 2990.0000 |     4 | MARKETING  |
+| RAVI   | ANALYST    |      2800 |     4 | SYSTEMS    |
+| SCOTT  | ANALYST    |      3000 |     4 | RESEARCH   |
+| TURNER | SALESMAN   |      1500 |     3 | SALES      |
+| WARD   | SALESMAN   |      1250 |     2 | SALES      |
++--------+------------+-----------+-------+------------+
+13 rows in set (0.00 sec)
+NOTE: Joining on BETWEEN instead of = is a non-equi (theta) join.
+
+18.  Find the employees who earn the minimum salary for their job. Sort in descending order of salary.
+mysql> SELECT e.ENAME, e.JOB, e.SAL FROM EMP e WHERE e.SAL = (SELECT MIN(SAL) FROM EMP WHERE JOB = e.JOB) ORDER BY e.SAL DESC, e.ENAME;
++--------+------------+------+
+| ENAME  | JOB        | SAL  |
++--------+------------+------+
+| KING   | PRESIDENT  | 5000 |
+| RAVI   | ANALYST    | 2800 |
+| CLARK  | MANAGER    | 2450 |
+| NEHA   | PROGRAMMER | 1900 |
+| MARTIN | SALESMAN   | 1250 |
+| WARD   | SALESMAN   | 1250 |
+| SMITH  | CLERK      |  800 |
++--------+------------+------+
+7 rows in set (0.00 sec)
+
+19.  Find the most recently hired employees in each department, ordered by hire date.
+mysql> SELECT e.DEPTNO, e.ENAME, e.HIREDATE FROM EMP e WHERE e.HIREDATE = (SELECT MAX(HIREDATE) FROM EMP WHERE DEPTNO = e.DEPTNO) ORDER BY e.HIREDATE;
++--------+--------+------------+
+| DEPTNO | ENAME  | HIREDATE   |
++--------+--------+------------+
+|     30 | JAMES  | 1981-12-03 |
+|     10 | MILLER | 1982-01-23 |
+|     20 | ADAMS  | 1983-01-12 |
+|     50 | NEHA   | 1983-07-21 |
+|     60 | KABIR  | 1983-09-15 |
++--------+--------+------------+
+5 rows in set (0.00 sec)
+
+20.  Find out the difference between the highest and lowest salaries.
+mysql> SELECT MAX(SAL) - MIN(SAL) AS difference FROM EMP;
++------------+
+| difference |
++------------+
+|       4200 |
++------------+
+1 row in set (0.00 sec)
+
+================================================================================================
+END OF FILE. Viva questions for every experiment: dbmsv.txt
+================================================================================================

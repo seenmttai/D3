@@ -1,0 +1,937 @@
+DBMS LAB (CSE201): VIVA QUESTIONS AND ANSWERS, EXPERIMENT BY EXPERIMENT
+Amity School of Engineering & Technology, B.Tech CSE. Lab software: MySQL (practical file: MySQL 5.1).
+
+Same order as dbms.txt (which has all the code and outputs):
+PART A  Lab file experiments: Exp 1, Exp 2, Exp 3
+PART B  Practical file (EMP / DEPT): Exp P1 to P12
+PART C  Syllabus lab list: Lab 1 to Lab 13
+PART D  Lab Assignment 1: Q1, Q2, Q3
+PART E  General DBMS viva (theory most often asked)
+Answers are written the way you can say them out loud: the point first, then one line of why/example.
+
+================================================================================================
+PART A: LAB FILE EXPERIMENTS
+================================================================================================
+
+------------------------------------------------------------------------------------------------
+EXPERIMENT 1: PRACTICE BASIC SQL QUERIES
+------------------------------------------------------------------------------------------------
+Q1. What is SQL?
+A.  Structured Query Language: the standard language to define, query and change data in a
+    relational database. It is declarative: you say WHAT you want, the DBMS decides HOW.
+
+Q2. What is the basic structure of a SELECT query?
+A.  SELECT columns FROM table WHERE condition GROUP BY ... HAVING ... ORDER BY ... ;
+    Only SELECT and FROM are compulsory (MySQL even allows SELECT 1; without FROM).
+
+Q3. What does SELECT * mean?
+A.  All columns of the table, in their table order. In programs it is better to list columns,
+    so the query doesn't break when a column is added.
+
+Q4. What is the WHERE clause?
+A.  It filters rows: only rows for which the condition is TRUE are kept. It is checked row by row.
+
+Q5. Difference between = and LIKE?
+A.  = needs an exact value; LIKE matches a pattern with wildcards % (any number of characters)
+    and _ (exactly one character). WHERE CustomerName LIKE 'G%' = names starting with G.
+
+Q6. What happens if you run UPDATE without WHERE?
+A.  Every row of the table is updated. Same for DELETE without WHERE: every row is deleted.
+
+Q7. Is SQL case-sensitive?
+A.  Keywords and (on Windows) table names are not: select = SELECT. Data comparison depends on the
+    collation; MySQL's default collation ignores case, so 'mexico' = 'Mexico'.
+
+Q8. What are aggregate functions? Name them.
+A.  Functions that turn many rows into one value: COUNT, SUM, AVG, MIN, MAX.
+
+Q9. COUNT(*) vs COUNT(column)?
+A.  COUNT(*) counts all rows. COUNT(column) counts rows where that column is NOT NULL.
+    COUNT(DISTINCT column) counts different non-NULL values.
+
+Q10. What does GROUP BY do?
+A.  Splits rows into groups with the same value of the column(s) and computes aggregates per group:
+    SELECT Country, COUNT(*) FROM Customers GROUP BY Country gives one row per country.
+
+Q11. Can you select a column that is not in GROUP BY?
+A.  In standard SQL, no: every selected column must be grouped or inside an aggregate. Old MySQL
+    allowed it and returned an arbitrary value; MySQL 5.7+ (ONLY_FULL_GROUP_BY) and Oracle reject it.
+
+Q12. Do aggregate functions count NULLs?
+A.  No. SUM, AVG, MIN, MAX and COUNT(col) skip NULLs; only COUNT(*) counts every row.
+
+Q13. Single vs double quotes for strings?
+A.  Single quotes are standard SQL ('Mexico'). MySQL also accepts double quotes for strings, but in
+    Oracle (and MySQL ANSI_QUOTES mode) double quotes mean an identifier such as "New Salary".
+
+------------------------------------------------------------------------------------------------
+EXPERIMENT 2: PRACTICE AND, OR, NOT, WILDCARDS AND ORDER BY
+------------------------------------------------------------------------------------------------
+Q1. Which is evaluated first, AND or OR?
+A.  AND (like multiplication before addition). a OR b AND c means a OR (b AND c). Use brackets.
+
+Q2. What does Country = 'Canada' OR Country = 'Mexico' AND ContactName LIKE 'A%' return?
+A.  All Canadian customers, plus Mexican customers whose contact starts with A, because AND binds
+    first. For "Canada or Mexico, and contact starts with A" write
+    (Country = 'Canada' OR Country = 'Mexico') AND ContactName LIKE 'A%'.
+
+Q3. What are the wildcard characters in LIKE?
+A.  % = zero or more characters, _ = exactly one character.
+    'A%' starts with A, '%s' ends with s, '%on%' contains on, '_r%' r is the 2nd letter,
+    '___' exactly 3 characters, 'B__%' starts with B and at least 3 characters.
+
+Q4. How do you search for a literal % or _?
+A.  Escape it: LIKE '50\%' in MySQL, or LIKE '50!%' ESCAPE '!' (works everywhere).
+
+Q5. Is LIKE case-sensitive?
+A.  In MySQL with the default collation, no. In Oracle, yes (use UPPER(col) LIKE 'A%').
+
+Q6. NOT Country = 'Spain' vs Country <> 'Spain'?
+A.  Same result. <> and != both mean not equal. NOT can also be combined: NOT LIKE, NOT IN,
+    NOT BETWEEN, IS NOT NULL.
+
+Q7. "Not from Spain AND not from Italy": why not OR?
+A.  NOT Spain OR NOT Italy is true for every row (a Spanish customer is "not Italy"). Neither-nor
+    needs AND, or simply Country NOT IN ('Spain','Italy').
+
+Q8. What does ORDER BY do and what is the default order?
+A.  Sorts the output. Default is ASC (ascending). DESC sorts descending. It is written after
+    WHERE / GROUP BY / HAVING (only LIMIT comes after it).
+
+Q9. ORDER BY Country, City DESC: what is sorted how?
+A.  Country ascending; within the same country, City descending. ASC/DESC applies only to the
+    column just before it.
+
+Q10. Can you ORDER BY a column you don't select?
+A.  Yes (except with DISTINCT / UNION in some databases).
+
+Q11. How are NULLs sorted?
+A.  MySQL puts NULLs first in ASC order, Oracle puts them last.
+
+Q12. Can you use a column alias in ORDER BY? In WHERE?
+A.  ORDER BY yes (it runs after SELECT). WHERE no (it runs before SELECT creates the alias).
+
+------------------------------------------------------------------------------------------------
+EXPERIMENT 3: PRACTICE DDL COMMANDS AND CONSTRAINTS
+------------------------------------------------------------------------------------------------
+Q1. What is DDL? Give examples.
+A.  Data Definition Language: defines structure. CREATE, ALTER, DROP, TRUNCATE, RENAME.
+
+Q2. What are DML, DCL, TCL (and DQL)?
+A.  DML (manipulation): INSERT, UPDATE, DELETE. DCL (control): GRANT, REVOKE.
+    TCL (transactions): COMMIT, ROLLBACK, SAVEPOINT. DQL (query): SELECT (some books put it in DML).
+
+Q3. What is a constraint?
+A.  A rule the DBMS checks on every INSERT/UPDATE to keep data valid: PRIMARY KEY, FOREIGN KEY,
+    UNIQUE, NOT NULL, CHECK, DEFAULT.
+
+Q4. What is a primary key?
+A.  Column(s) that uniquely identify each row: unique and NOT NULL. Only one primary key per table
+    (it may have several columns).
+
+Q5. PRIMARY KEY vs UNIQUE?
+A.  Both forbid duplicates. PK cannot be NULL and there is only one per table; UNIQUE allows NULL
+    (even several NULLs in MySQL) and a table can have many UNIQUE constraints.
+
+Q6. What is a foreign key?
+A.  A column whose value must exist as a key in another (parent) table. It links tables and enforces
+    referential integrity (no "orphan" rows).
+
+Q7. What error do you get when inserting a child row with a missing parent?
+A.  ERROR 1452: Cannot add or update a child row: a foreign key constraint fails.
+
+Q8. What happens when you delete a parent row that has children?
+A.  By default it is refused (RESTRICT / NO ACTION). With ON DELETE CASCADE the children are deleted
+    too; with ON DELETE SET NULL their foreign key becomes NULL.
+
+Q9. Why did a foreign key not work in MySQL 5.1?
+A.  The default engine before MySQL 5.5 is MyISAM, which ignores foreign keys (and has no
+    transactions). Create the tables with ENGINE=InnoDB. Also, a column-level
+    "DeptID INT REFERENCES Department(DeptID)" is accepted but ignored by MySQL: write the separate
+    FOREIGN KEY (DeptID) REFERENCES Department(DeptID) clause.
+
+Q10. Does MySQL enforce CHECK constraints?
+A.  Only from MySQL 8.0.16. Older versions (like 5.1 in the lab) parse CHECK and ignore it.
+    Oracle enforces CHECK.
+
+Q11. What is a composite key? Where did you use one?
+A.  A key made of two or more columns. Enrollment(StudentID, CourseID): one student takes many
+    courses and one course has many students, so only the pair is unique.
+
+Q12. How do you write a composite primary key?
+A.  At table level after the columns: PRIMARY KEY (StudentID, CourseID). Writing PRIMARY KEY on two
+    separate column lines gives "Multiple primary key defined".
+
+Q13. What is the DEFAULT constraint?
+A.  The value stored when an INSERT doesn't give that column. It doesn't change existing rows.
+
+Q14. ALTER TABLE: what can it do?
+A.  ADD a column, MODIFY its type/constraints, CHANGE (rename + retype), DROP a column, RENAME the
+    table, ADD/DROP constraints, SET/DROP DEFAULT.
+
+Q15. MODIFY vs CHANGE in MySQL?
+A.  MODIFY col new_definition changes type/constraints but keeps the name.
+    CHANGE old_name new_name definition can rename too. (RENAME COLUMN a TO b exists only in MySQL 8.)
+
+Q16. What happens to existing rows when you add a column?
+A.  They get NULL (or the column's DEFAULT) in the new column.
+
+Q17. Can you make a column NOT NULL if some rows have NULL there?
+A.  No, the ALTER fails (or in non-strict mode MySQL converts NULLs to 0/''). Update those rows first.
+
+Q18. How do you see a table's structure?
+A.  DESC table; (or DESCRIBE). SHOW CREATE TABLE table; shows the full statement including ENGINE
+    and the constraints MySQL really kept.
+
+Q19. What does Key = PRI / UNI / MUL mean in DESC?
+A.  PRI = part of the primary key, UNI = unique index, MUL = non-unique index (e.g. on a foreign key).
+
+Q20. CHAR vs VARCHAR?
+A.  CHAR(n) is fixed length (padded with spaces), good for fixed codes. VARCHAR(n) is variable length,
+    stores only what is used plus a length byte, good for names. Oracle recommends VARCHAR2.
+
+================================================================================================
+PART B: PRACTICAL FILE (EMP / DEPT, MYSQL 5.1)
+================================================================================================
+
+------------------------------------------------------------------------------------------------
+EXPERIMENT P1: CREATE TABLE COMMAND
+------------------------------------------------------------------------------------------------
+Q1. What did you do before CREATE TABLE in MySQL?
+A.  CREATE DATABASE company; then USE company; to select it.
+
+Q2. What is ERROR 1046 (3D000)?
+A.  "No database selected": a table was created before USE <database>. (CREATE TABLE company.EMP
+    would also work.)
+
+Q3. Syntax of CREATE TABLE?
+A.  CREATE TABLE name (col1 type [constraints], col2 type [constraints], ... [table constraints]);
+
+Q4. Which data types did you use?
+A.  INT for EMPNO, SAL, DEPTNO and CHAR(20) for ENAME / JOB / DNAME / LOC. Others: VARCHAR(n),
+    DECIMAL(p,s) for money, DATE, DATETIME, FLOAT.
+
+Q5. EMP has no primary key. Is that a problem?
+A.  It works, but duplicate EMPNOs could be inserted. EMPNO should be PRIMARY KEY in a real design.
+
+Q6. What is a schema / database / table?
+A.  Database (schema in MySQL) = named collection of tables. Table (relation) = rows (tuples) and
+    columns (attributes).
+
+Q7. What is a tuple, attribute, degree and cardinality?
+A.  Tuple = row; attribute = column; degree = number of columns; cardinality = number of rows.
+    EMP after task 37 has degree 5 and cardinality 12.
+
+------------------------------------------------------------------------------------------------
+EXPERIMENT P2: THE INSERT COMMAND
+------------------------------------------------------------------------------------------------
+Q1. Syntax of INSERT?
+A.  INSERT INTO table VALUES (v1, v2, ...);  (all columns in table order)
+    INSERT INTO table (c1, c2) VALUES (v1, v2);  (chosen columns; the rest get NULL/DEFAULT)
+
+Q2. How do you insert many rows at once?
+A.  INSERT INTO DEPT VALUES (10,'MARKETING','DELHI'), (20,'PRODUCTION','MUMBAI');
+
+Q3. What is ERROR 1136?
+A.  "Column count doesn't match value count": the number of values differs from the number of
+    columns (e.g. 4 values after JOB was added to EMP).
+
+Q4. How do you copy rows from another table?
+A.  INSERT INTO EMP2 SELECT * FROM EMP WHERE DEPTNO = 10;
+
+Q5. How do you insert a NULL or a date?
+A.  Write NULL without quotes; dates as 'YYYY-MM-DD' in MySQL ('2026-11-25').
+
+Q6. Is INSERT DDL or DML? Can it be rolled back?
+A.  DML. Yes, inside a transaction on an InnoDB table, before COMMIT.
+
+------------------------------------------------------------------------------------------------
+EXPERIMENT P3: THE SELECT AND DISPLAY COMMAND (aggregates, LIKE, subqueries)
+------------------------------------------------------------------------------------------------
+Q1. Why did MAX (SAL) give ERROR 1305?
+A.  With a space before the bracket MySQL looks for a stored function named MAX in the database.
+    Write MAX(SAL) with no space.
+
+Q2. Why did LIKE 'A %' return an empty set?
+A.  The space is a real character: it looks for "A", then a space. 'A%' was intended.
+
+Q3. How do you find names of exactly 5 letters?
+A.  LIKE '_____' (five underscores) or CHAR_LENGTH(ENAME) = 5. The file's 6 underscores found
+    6-letter names. (MySQL LENGTH counts bytes, CHAR_LENGTH counts characters.)
+
+Q4. Name with 'A' as the second letter?
+A.  LIKE '_A%': one underscore for the first letter, then A, then anything.
+
+Q5. Why can't you write WHERE SAL = MAX(SAL)?
+A.  WHERE works on one row at a time, before any grouping, so aggregates are not allowed there
+    (ERROR 1111: Invalid use of group function). Use a subquery:
+    WHERE SAL = (SELECT MAX(SAL) FROM EMP).
+
+Q6. What is a subquery?
+A.  A SELECT inside another statement, in brackets. A simple subquery gives its value to the outer
+    query (it can run once). It can be in WHERE, FROM (derived table) or SELECT.
+
+Q7. Single-row vs multi-row subquery?
+A.  Single-row returns one value: use =, <, >. Multi-row returns many: use IN, ANY, ALL, EXISTS.
+    = with a multi-row subquery gives ERROR 1242 (Subquery returns more than 1 row).
+
+Q8. How do you find the second highest salary?
+A.  SELECT MAX(SAL) FROM EMP WHERE SAL < (SELECT MAX(SAL) FROM EMP);
+    or SELECT DISTINCT SAL FROM EMP ORDER BY SAL DESC LIMIT 1,1;
+
+Q9. Employees earning more than the average?
+A.  SELECT * FROM EMP WHERE SAL > (SELECT AVG(SAL) FROM EMP);
+
+Q10. What was wrong with task 22 in the file?
+A.  It used WHERE DEPTNO = (SELECT DEPTNO FROM EMP WHERE EMPNO = 15), which lists everyone in
+    employee 15's department. The task only needs WHERE EMPNO = 15.
+
+Q11. SAL > 5000 AND SAL < 15000 vs SAL BETWEEN 5000 AND 15000?
+A.  BETWEEN includes both ends, so it also returns 5000 and 15000 (TIA). "Greater than / less than"
+    are strict, so use > and <.
+
+Q12. What is a column alias?
+A.  A new name for an output column: SELECT SAL*12 AS ANNUAL FROM EMP. Quote it if it has a space.
+
+------------------------------------------------------------------------------------------------
+EXPERIMENT P4: THE ORDER BY CLAUSE
+------------------------------------------------------------------------------------------------
+Q1. How did you list employees alphabetically?
+A.  ORDER BY ENAME (ascending by default).
+
+Q2. What was wrong with task 10 in the file?
+A.  The task said descending order of EMPNO; the file sorted ORDER BY SAL DESC. Correct:
+    SELECT * FROM EMP ORDER BY EMPNO DESC;
+
+Q3. Can you sort by more than one column?
+A.  Yes: ORDER BY DEPTNO, SAL DESC: by department, and inside a department highest salary first.
+
+Q4. Can ORDER BY use a column number?
+A.  Yes, ORDER BY 2 sorts by the second selected column (works but is less readable).
+
+Q5. Without ORDER BY, in what order do rows come?
+A.  No guaranteed order. It often looks like insertion order, but SQL doesn't promise it.
+
+------------------------------------------------------------------------------------------------
+EXPERIMENT P5: THE DISTINCT COMMAND
+------------------------------------------------------------------------------------------------
+Q1. What does DISTINCT do?
+A.  Removes duplicate rows from the result: SELECT DISTINCT DEPTNO FROM EMP gives 10, 20, 30.
+
+Q2. DISTINCT on two columns?
+A.  It applies to the combination: SELECT DISTINCT DEPTNO, JOB gives each different (dept, job) pair.
+
+Q3. COUNT(DISTINCT DEPTNO) vs DISTINCT COUNT(DEPTNO)?
+A.  COUNT(DISTINCT DEPTNO) counts different departments (3). DISTINCT COUNT(DEPTNO) counts all
+    12 rows and then removes duplicates of that single number.
+
+Q4. Why did DISTINCT JOB show 10 values but COUNT(DISTINCT JOB) give 9?
+A.  DISTINCT shows NULL as one value (GAURANG had no job), but COUNT ignores NULLs.
+
+Q5. DISTINCT vs GROUP BY?
+A.  SELECT DISTINCT DEPTNO and SELECT DEPTNO ... GROUP BY DEPTNO give the same rows; GROUP BY is
+    needed when you also want aggregates per group.
+
+Q6. Is UNIQUE the same as DISTINCT?
+A.  In MySQL UNIQUE is a constraint, not a SELECT keyword. (Oracle accepts SELECT UNIQUE as a
+    synonym of DISTINCT.)
+
+------------------------------------------------------------------------------------------------
+EXPERIMENT P6: THE IN, NOT IN COMMAND (and BETWEEN)
+------------------------------------------------------------------------------------------------
+Q1. What does IN do?
+A.  Tests membership in a list: DEPTNO IN (10, 20, 30) = DEPTNO=10 OR DEPTNO=20 OR DEPTNO=30.
+
+Q2. What was wrong with task 29 in the file?
+A.  The task wanted departments 20 or 30, but the file used NOT IN (20, 30), which returns the
+    opposite (department 10).
+
+Q3. Why did NOT IN (10, 20, 30) return an empty set?
+A.  Every employee was in department 10, 20 or 30, so no row qualified.
+
+Q4. What is the NOT IN NULL trap?
+A.  If the list (usually a subquery) contains a NULL, x NOT IN (...) is never true, so the query
+    returns no rows at all. Use NOT EXISTS or filter the NULLs out.
+
+Q5. Is BETWEEN inclusive? Order of values?
+A.  Inclusive at both ends. The smaller value must come first: BETWEEN 15000 AND 5000 returns nothing.
+
+Q6. IN vs EXISTS?
+A.  IN compares a value with a list. EXISTS is true if the subquery returns at least one row; it is
+    usually correlated and handles NULLs safely.
+
+------------------------------------------------------------------------------------------------
+EXPERIMENT P7: THE GROUP BY ... HAVING CLAUSE
+------------------------------------------------------------------------------------------------
+Q1. WHERE vs HAVING?
+A.  WHERE filters rows before grouping and cannot use aggregates. HAVING filters groups after
+    GROUP BY and usually uses aggregates (HAVING COUNT(*) > 2).
+
+Q2. In what order are the clauses processed?
+A.  FROM, WHERE, GROUP BY, HAVING, SELECT, ORDER BY (then LIMIT). This is why WHERE can't use
+    aggregates or SELECT aliases.
+
+Q3. Can WHERE and HAVING be used together?
+A.  Yes: SELECT DEPTNO, AVG(SAL) FROM EMP WHERE SAL > 5000 GROUP BY DEPTNO HAVING AVG(SAL) > 10000;
+
+Q4. Count employees in each department?
+A.  SELECT DEPTNO, COUNT(*) FROM EMP GROUP BY DEPTNO;
+
+Q5. Departments with more than 2 employees?
+A.  SELECT DEPTNO, COUNT(*) FROM EMP GROUP BY DEPTNO HAVING COUNT(*) > 2;
+
+Q6. Can you use HAVING without GROUP BY?
+A.  Yes: the whole table is one group, e.g. SELECT COUNT(*) FROM EMP HAVING COUNT(*) > 10;
+
+Q7. Can you nest aggregates like MAX(COUNT(*))?
+A.  Not in MySQL. Use ORDER BY COUNT(*) DESC LIMIT 1, or a subquery in FROM. (Oracle allows
+    nested aggregates with GROUP BY.)
+
+------------------------------------------------------------------------------------------------
+EXPERIMENT P8: THE JOIN COMMAND
+------------------------------------------------------------------------------------------------
+Q1. What is a join?
+A.  Combining rows of two or more tables using a related column (EMP.DEPTNO = DEPT.DNO).
+
+Q2. How did you join EMP and DEPT?
+A.  SELECT ENAME, SAL, EMPNO, DNAME, LOC FROM EMP, DEPT WHERE EMP.DEPTNO = DEPT.DNO;
+    Modern form: FROM EMP JOIN DEPT ON EMP.DEPTNO = DEPT.DNO.
+
+Q3. What happens without the join condition?
+A.  Cartesian product (cross join): every EMP row with every DEPT row, 12 x 4 = 48 rows.
+
+Q4. Types of joins?
+A.  INNER (only matching rows), LEFT OUTER (all left rows + matches), RIGHT OUTER, FULL OUTER (all
+    rows of both), CROSS (all pairs), NATURAL (auto-match same-named columns), SELF join.
+
+Q5. Why didn't SALES (DNO 40) appear in the join output?
+A.  It has no employees, and an inner join keeps only matching rows. A LEFT JOIN from DEPT keeps it.
+
+Q6. Does MySQL support FULL OUTER JOIN?
+A.  No. Emulate it: LEFT JOIN ... UNION ... RIGHT JOIN.
+
+Q7. Equi-join vs non-equi (theta) join?
+A.  Equi-join uses = in the condition. Theta join uses any operator, e.g. joining EMP to SALGRADE
+    with SAL BETWEEN LOSAL AND HISAL.
+
+Q8. What is a natural join? Why be careful?
+A.  It joins automatically on all columns with the same name and shows them once. Risky: if the
+    tables share an unrelated column name the join changes silently, and if they share none (EMP has
+    DEPTNO, DEPT has DNO) a NATURAL JOIN becomes a Cartesian product.
+
+Q9. What is a self join?
+A.  A table joined with itself using two aliases, e.g. employee and manager from the same EMP table:
+    FROM EMP e JOIN EMP m ON e.MGR = m.EMPNO.
+
+Q10. What are table aliases?
+A.  Short names for tables in a query (FROM EMP E, DEPT D), needed for self joins and to avoid
+    ambiguity when both tables have the same column name.
+
+Q11. Join vs subquery?
+A.  Both can answer "employees of department SALES". A join is used when you need columns from both
+    tables; a subquery when the second table only filters.
+
+------------------------------------------------------------------------------------------------
+EXPERIMENT P9: THE UPDATE COMMAND (and DELETE)
+------------------------------------------------------------------------------------------------
+Q1. Syntax of UPDATE?
+A.  UPDATE table SET col = value [, col2 = value2] WHERE condition;
+
+Q2. How do you give a raise based on the current salary?
+A.  UPDATE EMP SET SAL = SAL + 1000 WHERE DEPTNO = 10;  (no += in SQL)
+
+Q3. What does "Rows matched: 1  Changed: 1" mean?
+A.  Matched = rows found by WHERE; Changed = rows whose value actually changed. Running the same
+    UPDATE again matches 1 but changes 0.
+
+Q4. How do you find or delete rows where JOB is empty?
+A.  WHERE JOB IS NULL. JOB = NULL is never true (any comparison with NULL is unknown).
+
+Q5. The file inserted 'RIDHMIMA' and later updated WHERE ENAME = 'RIDHMIMA'. Lesson?
+A.  The WHERE value must match the stored data exactly (apart from case in MySQL); a different
+    spelling matches 0 rows and nothing changes, without any error.
+
+Q6. UPDATE vs ALTER?
+A.  UPDATE changes data in rows (DML). ALTER changes the table structure (DDL).
+
+------------------------------------------------------------------------------------------------
+EXPERIMENT P10: THE ALTER TABLE COMMAND
+------------------------------------------------------------------------------------------------
+Q1. How did you add the JOB column?
+A.  ALTER TABLE EMP ADD (JOB CHAR(20));  (brackets optional; ADD COLUMN also works)
+
+Q2. What values did JOB have right after adding it?
+A.  NULL in every existing row, until the UPDATE tasks filled them.
+
+Q3. How do you change a column's size or type?
+A.  ALTER TABLE EMP MODIFY JOB VARCHAR(30);   (Oracle: MODIFY (JOB VARCHAR2(30)))
+
+Q4. How do you rename a column / table?
+A.  Column: ALTER TABLE EMP CHANGE JOB DESIGNATION CHAR(20); (MySQL 8: RENAME COLUMN JOB TO ...)
+    Table: ALTER TABLE EMP RENAME TO EMPLOYEE; or RENAME TABLE EMP TO EMPLOYEE;
+
+Q5. How do you drop a column?
+A.  ALTER TABLE EMP DROP COLUMN JOB;
+
+Q6. How do you add a primary key later?
+A.  ALTER TABLE EMP ADD PRIMARY KEY (EMPNO);  (fails if EMPNO has duplicates or NULLs)
+
+------------------------------------------------------------------------------------------------
+EXPERIMENT P11: CREATING TABLE FROM EXISTING TABLE
+------------------------------------------------------------------------------------------------
+Q1. How do you copy a table with its data?
+A.  CREATE TABLE EMP2 AS SELECT * FROM EMP;  (called CTAS)
+
+Q2. Why did CREATE TABLE EMP2; fail?
+A.  ERROR 1113: a table must have at least one column. CREATE TABLE needs columns or an AS SELECT.
+
+Q3. Are constraints copied by CTAS?
+A.  No. Columns, types and rows are copied; PRIMARY KEY, FOREIGN KEY, indexes and AUTO_INCREMENT
+    are not (NOT NULL usually is).
+
+Q4. How do you copy only the structure?
+A.  CREATE TABLE EMP3 AS SELECT * FROM EMP WHERE 1 = 0;  or (MySQL) CREATE TABLE EMP3 LIKE EMP;
+
+Q5. How do you copy only some rows or columns?
+A.  CREATE TABLE EMP_D10 AS SELECT EMPNO, ENAME FROM EMP WHERE DEPTNO = 10;
+
+------------------------------------------------------------------------------------------------
+EXPERIMENT P12: THE DROP TABLE COMMAND
+------------------------------------------------------------------------------------------------
+Q1. What does DROP TABLE do?
+A.  Removes the table completely: structure, data, indexes. SELECT from it then gives
+    ERROR 1146: Table 'company.emp2' doesn't exist.
+
+Q2. DELETE vs TRUNCATE vs DROP?
+A.  DELETE (DML): removes chosen rows (WHERE allowed), row by row, can be rolled back.
+    TRUNCATE (DDL): removes all rows fast, keeps the table, resets AUTO_INCREMENT, auto-commits.
+    DROP (DDL): removes the table itself.
+
+Q3. Can you roll back a DROP?
+A.  No. DDL commits automatically in MySQL and Oracle. (Oracle 10g+ has a recycle bin:
+    FLASHBACK TABLE ... TO BEFORE DROP.)
+
+Q4. Can you drop a table referenced by a foreign key?
+A.  Not while the child table's FK points to it; drop the child (or the constraint) first.
+
+Q5. How do you drop a table only if it exists?
+A.  DROP TABLE IF EXISTS EMP2;
+
+================================================================================================
+PART C: SYLLABUS LAB LIST (EMPLOYEE & DEPARTMENT TABLES)
+================================================================================================
+
+LAB 1 (employees without a manager)
+Q1. How is "no manager" stored and tested?
+A.  As NULL; test with manager_id IS NULL. manager_id = NULL returns nothing, without an error.
+Q2. What is NULL?
+A.  A missing/unknown value. It is not 0 and not ''. Any comparison or arithmetic with NULL gives
+    NULL/unknown. (Oracle treats '' as NULL; MySQL doesn't.)
+
+LAB 2 (commission earners sorted)
+Q1. How did you get only commission earners?
+A.  WHERE commission_pct IS NOT NULL.
+Q2. ORDER BY salary DESC, commission_pct DESC: what does the second key do?
+A.  It only breaks ties between employees with the same salary.
+
+LAB 3 (prompt for a manager ID)
+Q1. How does a query "prompt the user"?
+A.  In Oracle SQL*Plus with substitution variables: WHERE manager_id = &mgr_num prompts
+    "Enter value for mgr_num". ORDER BY &col lets the user pick the sort column. &&var remembers it.
+Q2. And in MySQL?
+A.  MySQL has no prompt. Set a user variable first: SET @mgr = 103; ... WHERE manager_id = @mgr;
+    (programs use prepared statements with ? placeholders).
+
+LAB 4 and LAB 5 (patterns)
+Q1. Third letter 'a'?
+A.  LIKE '__a%' (two underscores first).
+Q2. Names containing both a and e?
+A.  LIKE '%a%' AND LIKE '%e%'. One pattern '%a%e%' would miss names where e comes before a.
+
+LAB 6 (IN / NOT IN together)
+Q1. Why IN instead of OR here?
+A.  job_id IN ('SA_REP','ST_CLERK') AND salary NOT IN (2500,3500,7000) is shorter and avoids the
+    AND/OR bracket mistakes.
+
+LAB 7 (New Salary)
+Q1. How do you increase by 15.5% and show a whole number?
+A.  ROUND(salary * 1.155, 0). 1.155 = 100% + 15.5%. ROUND rounds, TRUNCATE (MySQL) / TRUNC (Oracle) chops.
+Q2. How do you label a column "New Salary"?
+A.  AS "New Salary": an alias with a space must be quoted (double quotes or backticks).
+Q3. Does a calculated column change the table?
+A.  No, it exists only in the output.
+
+LAB 8 (Dream Salaries)
+Q1. How do you join strings in MySQL and Oracle?
+A.  MySQL: CONCAT(a, b, ...). Oracle: a || b (Oracle's CONCAT takes only 2 arguments).
+    In MySQL || means OR, unless PIPES_AS_CONCAT mode is on.
+
+LAB 9 (LPAD)
+Q1. What does LPAD(salary, 15, '$') do?
+A.  Pads on the left with $ until the text is 15 characters long: $$$$$$$$$$24000. RPAD pads right.
+Q2. Other string functions?
+A.  UPPER, LOWER, LENGTH / CHAR_LENGTH, SUBSTR(s, start, len), INSTR / LOCATE, TRIM, REPLACE, CONCAT.
+
+LAB 10 (review date)
+Q1. How do you find the first Monday after six months?
+A.  Oracle: NEXT_DAY(ADD_MONTHS(hire_date, 6), 'MONDAY').
+    MySQL: d = DATE_ADD(hire_date, INTERVAL 6 MONTH), then DATE_ADD(d, INTERVAL 7 - WEEKDAY(d) DAY).
+Q2. How do you format it like "Monday, the 31st of July, 2000"?
+A.  MySQL DATE_FORMAT(d, '%W, the %D of %M, %Y'). Oracle TO_CHAR(d, 'fmDay, "the" Ddspth "of" Month, YYYY')
+    which can even spell "Thirty-First".
+Q3. Common date functions?
+A.  MySQL: CURDATE(), NOW(), DATE_ADD, DATEDIFF, YEAR(), MONTH(), DAYNAME(), DATE_FORMAT.
+    Oracle: SYSDATE, ADD_MONTHS, MONTHS_BETWEEN, NEXT_DAY, LAST_DAY, TO_CHAR, TO_DATE.
+
+LAB 11 (day of week)
+Q1. Why ORDER BY WEEKDAY(hire_date) and not ORDER BY DAY?
+A.  DAY holds names, which sort alphabetically (Friday first). WEEKDAY gives Monday = 0 ... Sunday = 6,
+    so it sorts in week order starting Monday. (DAYOFWEEK starts with Sunday = 1.)
+
+LAB 12 (ER diagram -> relational schema)
+Q1. ER notation symbols?
+A.  Rectangle = entity, ellipse = attribute (underlined = key, double = multivalued, dashed =
+    derived), diamond = relationship, double rectangle = weak entity, double diamond = identifying
+    relationship, double line = total participation.
+Q2. How do you convert ER to tables?
+A.  Each strong entity becomes a table with its key. 1:N: put the "one" side's key as a FK in the
+    "many" side. M:N: a new table with both keys (composite PK). Multivalued attribute: a separate
+    table. Weak entity: table with owner's key + partial key as PK.
+Q3. Strong vs weak entity?
+A.  A strong entity has its own key. A weak entity (e.g. COPY of a BOOK, DEPENDENT of an EMPLOYEE)
+    is identified only together with its owner.
+
+LAB 13 (project with Python front end)
+Q1. How does Python connect to MySQL?
+A.  mysql.connector.connect(host, user, password, database), then a cursor: cursor.execute(sql,
+    params), fetchall(), and connection.commit() after DML.
+Q2. Why use %s parameters instead of joining strings?
+A.  To prevent SQL injection and quoting errors: the driver escapes the values.
+
+================================================================================================
+PART D: LAB ASSIGNMENT 1
+================================================================================================
+
+Q1 (Course / Student / Installment)
+Q1. Why is (course_no, full_part) UNIQUE in Course_fee?
+A.  A course has one fee for full-time and one for part-time, so the pair must not repeat.
+    It is a composite UNIQUE key (candidate key) of Course_fee.
+Q2. What does ON DELETE CASCADE on Installment do?
+A.  Deleting a student automatically deletes that student's installment rows.
+Q3. How do you count students who joined this month?
+A.  WHERE YEAR(start_dt) = YEAR(CURDATE()) AND MONTH(start_dt) = MONTH(CURDATE()).
+Q4. How do you increase Oracle's fee by 50%?
+A.  UPDATE Course_fee SET fees = fees * 1.5 WHERE course_no = (SELECT course_no FROM Course
+    WHERE course_name = 'Oracle');
+Q5. How do you show a date as DD-MONTH-YYYY?
+A.  MySQL DATE_FORMAT(d, '%d-%M-%Y'); Oracle TO_CHAR(d, 'DD-MONTH-YYYY').
+Q6. Which course has the most admissions?
+A.  GROUP BY course_no ORDER BY COUNT(*) DESC LIMIT 1 (Oracle: FETCH FIRST 1 ROWS ONLY or ROWNUM).
+
+Q2 (Supplier - Parts - Projects)
+Q1. What is the SPJ table, and its key?
+A.  A relationship table linking suppliers, parts and projects (a ternary relationship) with QTY.
+    Its key is (SNO, PNO, JNO); each is a foreign key.
+Q2. Why DISTINCT in "suppliers who supply J1"?
+A.  A supplier may ship several parts to J1; DISTINCT lists each supplier once.
+Q3. How do you answer "parts supplied to ALL London projects"?
+A.  Relational division: GROUP BY PNO HAVING COUNT(DISTINCT JNO) = (number of London projects),
+    or a double NOT EXISTS ("no London project that this part is not supplied to").
+Q4. Why does JNO = 'J1' AND JNO = 'J2' return nothing?
+A.  One row can't have two values. "Supplies both J1 and J2" needs two subqueries (SNO IN ... AND
+    SNO IN ...) or GROUP BY SNO HAVING COUNT(DISTINCT JNO) = 2.
+Q5. What is a correlated subquery?
+A.  A subquery that uses a column of the outer row, so it is evaluated per outer row, e.g.
+    NOT EXISTS (SELECT * FROM SPJ x WHERE x.PNO = p.PNO AND x.JNO = j.JNO).
+Q6. EXISTS vs IN?
+A.  EXISTS checks whether a row exists (true/false) and ignores NULL problems; IN compares a value
+    with a list. EXISTS is natural for correlated checks.
+
+Q3 (Employee queries: EMP / DEPT / SALGRADE)
+Q1. How did you find employees who earn more than their department's average?
+A.  Correlated subquery: WHERE e.SAL > (SELECT AVG(SAL) FROM EMP WHERE DEPTNO = e.DEPTNO).
+Q2. How did you list employees with their manager's name?
+A.  Self join: FROM EMP e LEFT JOIN EMP m ON e.MGR = m.EMPNO (LEFT keeps KING, who has no manager).
+Q3. How did you find each employee's salary grade?
+A.  Non-equi join: JOIN SALGRADE g ON e.SAL BETWEEN g.LOSAL AND g.HISAL.
+Q4. What is gross salary and why IFNULL?
+A.  SAL + COMM. COMM is NULL for most employees and SAL + NULL = NULL, so use SAL + IFNULL(COMM, 0)
+    (Oracle: NVL(COMM, 0), standard: COALESCE).
+Q5. Department with no employees?
+A.  DEPT LEFT JOIN EMP ... WHERE EMP.EMPNO IS NULL, or NOT EXISTS. (OPERATIONS.)
+Q6. Length of service?
+A.  MySQL TIMESTAMPDIFF(YEAR, HIREDATE, CURDATE()); Oracle MONTHS_BETWEEN(SYSDATE, HIREDATE)/12.
+Q7. Year in which most employees joined?
+A.  GROUP BY YEAR(HIREDATE) ORDER BY COUNT(*) DESC LIMIT 1.
+Q8. Difference between highest and lowest salary?
+A.  SELECT MAX(SAL) - MIN(SAL) FROM EMP;
+
+================================================================================================
+PART E: GENERAL DBMS VIVA (THEORY MOST OFTEN ASKED)
+================================================================================================
+
+--- Basics ---
+Q1. What is a DBMS? Examples?
+A.  Software to store, retrieve and manage data in databases: MySQL, Oracle, PostgreSQL, SQL Server.
+    An RDBMS stores data in tables (relations) linked by keys.
+
+Q2. Advantages of DBMS over a file system?
+A.  Less redundancy and inconsistency, easy querying, integrity constraints, atomic transactions,
+    safe concurrent access, security/access control, backup and recovery, data independence.
+
+Q3. Disadvantages of a DBMS?
+A.  Cost of software/hardware/training, complexity, and overhead for very small applications.
+
+Q4. Who is a DBA?
+A.  Database Administrator: defines the schema and storage, grants access, does backup/recovery,
+    monitors and tunes performance.
+
+Q5. Types of database users?
+A.  Naive/end users (use apps), application programmers, sophisticated users (write queries),
+    and the DBA.
+
+Q6. What is metadata / data dictionary?
+A.  Data about data: table definitions, columns, constraints, users. Stored in the system catalog
+    (MySQL's information_schema).
+
+--- Architecture & data independence ---
+Q7. Three-schema (ANSI/SPARC) architecture?
+A.  External level (user views), conceptual level (whole logical structure: tables, constraints),
+    internal level (physical storage: files, indexes).
+
+Q8. Physical vs logical data independence?
+A.  Physical: change storage (indexes, files) without changing the conceptual schema. Logical:
+    change the conceptual schema (add a column, split a table) without changing user views/programs.
+    Logical is harder to achieve.
+
+Q9. Schema vs instance?
+A.  Schema = the design (structure), rarely changes. Instance = the data at a particular moment.
+
+Q10. What are data models?
+A.  Ways to describe data: hierarchical, network, relational (tables), ER (design), object-oriented,
+    document/NoSQL.
+
+--- Keys ---
+Q11. Super key?
+A.  Any set of attributes that uniquely identifies a row, e.g. {RollNo}, {RollNo, Name}.
+
+Q12. Candidate key?
+A.  A minimal super key: no attribute can be removed. A table can have several, e.g. RollNo, Email.
+
+Q13. Primary key vs candidate key vs alternate key?
+A.  The primary key is the candidate key chosen as the main identifier; the other candidate keys
+    are alternate keys.
+
+Q14. Foreign key, composite key, surrogate key?
+A.  Foreign key: refers to a key of another table. Composite: key of 2+ columns. Surrogate: an
+    artificial id with no business meaning (AUTO_INCREMENT).
+
+Q15. Prime / non-prime attribute?
+A.  Prime = part of some candidate key; non-prime = not part of any. Used in 2NF/3NF definitions.
+
+Q16. Entity integrity vs referential integrity?
+A.  Entity integrity: primary key can't be NULL. Referential integrity: a foreign key must match an
+    existing parent key or be NULL.
+
+--- ER model ---
+Q17. Entity, entity set, attribute, relationship?
+A.  Entity = a real-world object (a student); entity set = all students; attribute = a property
+    (name); relationship = association between entities (student ENROLLS IN course).
+
+Q18. Types of attributes?
+A.  Simple/composite (Name -> First, Last), single/multivalued (phones), stored/derived (Age from
+    DOB), key attribute.
+
+Q19. Cardinality and participation?
+A.  Cardinality: 1:1, 1:N, M:N. Participation: total (every entity must take part, double line) or
+    partial.
+
+Q20. Generalization, specialization, aggregation?
+A.  Generalization: combine entities into a higher one (Car, Bike -> Vehicle). Specialization: split
+    into sub-entities (Employee -> Engineer, Manager). Aggregation: treat a relationship as an entity
+    so it can take part in another relationship.
+
+--- Normalization ---
+Q21. What is normalization? Why?
+A.  Splitting tables to reduce redundancy and avoid insert, update and delete anomalies, using
+    functional dependencies.
+
+Q22. What is a functional dependency?
+A.  X -> Y: rows that agree on X must agree on Y. RollNo -> Name.
+
+Q23. Insert, update, delete anomalies (example)?
+A.  In one Emp_Dept table: can't add a new department without an employee (insert); renaming a
+    department needs many rows updated (update); deleting the last employee loses the department
+    (delete).
+
+Q24. 1NF?
+A.  Every value is atomic (one value per cell), no repeating groups. A cell "9810011111, 9810022222"
+    breaks 1NF.
+
+Q25. 2NF?
+A.  1NF + no partial dependency: no non-prime attribute depends on only part of a composite key.
+    Enrollment(StudentID, CourseID, StudentName): StudentName depends only on StudentID, so it isn't 2NF.
+
+Q26. 3NF?
+A.  2NF + no transitive dependency: non-prime attributes depend only on the key. EmpID -> DeptID
+    -> DeptName is transitive, so move DeptName to a Dept table.
+
+Q27. BCNF?
+A.  For every non-trivial FD X -> Y, X is a super key. Stricter than 3NF (3NF allows Y to be prime).
+
+Q28. 4NF and 5NF?
+A.  4NF: BCNF + no non-trivial multi-valued dependency. 5NF: no join dependency that isn't implied
+    by candidate keys.
+
+Q29. Lossless decomposition and dependency preservation?
+A.  Lossless: joining the pieces gives back exactly the original table (no extra rows); true when the
+    common attributes are a key of one piece. Dependency preserving: all FDs can still be checked
+    using the pieces.
+
+Q30. What is denormalization?
+A.  Adding redundancy on purpose (e.g. storing a total) to make reads faster.
+
+--- Transactions & concurrency ---
+Q31. What is a transaction?
+A.  A group of operations that must succeed or fail as one unit (a bank transfer: debit + credit).
+
+Q32. ACID properties?
+A.  Atomicity (all or nothing), Consistency (valid state to valid state), Isolation (concurrent
+    transactions don't see each other's partial work), Durability (committed changes survive crashes).
+
+Q33. Transaction states?
+A.  Active -> Partially committed -> Committed, or Active/Partially committed -> Failed -> Aborted.
+
+Q34. COMMIT, ROLLBACK, SAVEPOINT?
+A.  COMMIT makes changes permanent; ROLLBACK undoes everything since the last COMMIT; SAVEPOINT s1
+    marks a point you can ROLLBACK TO s1 without undoing the whole transaction.
+
+Q35. What is autocommit in MySQL?
+A.  On by default: every statement commits immediately. To roll back, START TRANSACTION first (or
+    SET autocommit = 0), and the table must be InnoDB.
+
+Q36. Concurrency problems?
+A.  Lost update, dirty read (reading uncommitted data), unrepeatable read (same row reads
+    differently), phantom read (new rows appear in a repeated range query).
+
+Q37. Isolation levels?
+A.  READ UNCOMMITTED, READ COMMITTED, REPEATABLE READ (MySQL InnoDB default), SERIALIZABLE.
+
+Q38. What is a schedule? Serial vs serializable?
+A.  The order in which operations of concurrent transactions run. Serial: one transaction completely
+    after another. Serializable: interleaved but equivalent to some serial schedule.
+
+Q39. How do you test conflict serializability?
+A.  Draw a precedence graph (edge Ti -> Tj when they conflict on the same item, at least one writes,
+    Ti first). No cycle = conflict serializable.
+
+Q40. Shared vs exclusive lock?
+A.  Shared (S) for reading: many transactions can hold it. Exclusive (X) for writing: only one, and
+    it conflicts with S and X.
+
+Q41. Two-phase locking (2PL)?
+A.  Growing phase: only acquire locks; shrinking phase: only release. Guarantees conflict
+    serializability but can deadlock. Strict 2PL keeps X-locks until commit/abort.
+
+Q42. What is a deadlock? Conditions?
+A.  Two transactions each wait for a lock the other holds. Conditions: mutual exclusion, hold and
+    wait, no preemption, circular wait.
+
+Q43. Deadlock detection and prevention?
+A.  Detection: a cycle in the wait-for graph, then abort a victim. Prevention: wait-die (older waits,
+    younger dies), wound-wait (older aborts younger, younger waits), timeouts.
+
+Q44. Timestamp ordering protocol?
+A.  Each transaction gets a timestamp; conflicting operations must happen in timestamp order,
+    otherwise the late transaction is rolled back. No locks, so no deadlock.
+
+Q45. Recovery: log, checkpoint, undo/redo?
+A.  The log records every change before it is written (write-ahead logging). After a crash, redo
+    committed transactions and undo uncommitted ones. Checkpoints limit how far back to scan.
+
+--- Indexes, views, other objects ---
+Q46. What is an index? Trade-off?
+A.  A sorted structure (usually a B+ tree) on columns for fast searching. Faster reads; slower
+    INSERT/UPDATE/DELETE and extra space. CREATE INDEX idx ON EMP(ENAME);
+
+Q47. Clustered vs non-clustered index?
+A.  Clustered: rows stored in index order, only one per table (InnoDB: the primary key).
+    Non-clustered (secondary): separate structure pointing to rows, many per table.
+
+Q48. What is a view? Why use it?
+A.  A virtual table defined by a stored SELECT (no data of its own). For security (hide columns),
+    simplicity (hide joins) and logical data independence. CREATE VIEW v AS SELECT ...
+
+Q49. Can you update through a view?
+A.  Simple views on one table (no GROUP BY, DISTINCT, aggregates) are updatable; views with
+    aggregates are not.
+
+Q50. View vs materialized view?
+A.  A view stores only the query; a materialized view (Oracle) stores the result and is refreshed.
+
+Q51. Stored procedure vs function?
+A.  Both are stored named blocks. A function returns one value and can be used in SELECT; a
+    procedure is run with CALL (MySQL) / EXEC (SQL*Plus) and returns results through OUT parameters.
+
+Q52. What is a trigger?
+A.  Code that runs automatically BEFORE/AFTER INSERT, UPDATE or DELETE on a table (audit logs,
+    validation). NEW and OLD refer to the row's new and old values.
+
+Q53. What is a cursor?
+A.  A pointer for processing a query result row by row inside a procedure: DECLARE, OPEN, FETCH
+    in a loop, CLOSE. Oracle also has implicit cursors for every DML statement.
+
+Q54. Why DELIMITER // in MySQL?
+A.  So the ; inside a procedure/trigger body doesn't end the CREATE statement in the console.
+
+Q55. What is PL/SQL?
+A.  Oracle's procedural extension of SQL: blocks with DECLARE, BEGIN, EXCEPTION, END, variables,
+    loops and conditions.
+
+Q56. GRANT and REVOKE?
+A.  DCL commands: GRANT SELECT, INSERT ON company.EMP TO 'ravi'@'localhost'; REVOKE INSERT ON
+    company.EMP FROM 'ravi'@'localhost'.
+
+Q57. UNION vs UNION ALL? INTERSECT, MINUS?
+A.  UNION removes duplicates, UNION ALL keeps them (faster). INTERSECT = common rows, MINUS (Oracle)
+    / EXCEPT = rows in the first but not the second. Same number of compatible columns needed.
+
+--- Relational algebra & query processing ---
+Q58. Basic relational algebra operators?
+A.  Selection (sigma: rows, like WHERE), projection (pi: columns, removes duplicates), union,
+    set difference (-), Cartesian product (x), rename (rho). Derived: join (bowtie), intersection,
+    division (for "all" queries).
+
+Q59. Selection vs projection?
+A.  Selection picks rows: sigma SAL>5000 (EMP). Projection picks columns: pi ENAME (EMP).
+
+Q60. What is relational calculus?
+A.  A non-procedural query language (tuple or domain calculus): describe what you want, not how.
+    Relational algebra is procedural.
+
+Q61. Query processing steps and optimization?
+A.  Parsing/translation into relational algebra, optimization (choose the cheapest plan), evaluation.
+    Heuristic optimization (push selections/projections down, filter early) and cost-based
+    optimization (estimate I/O/CPU from statistics). EXPLAIN SELECT ... shows MySQL's plan.
+
+--- Misc ---
+Q62. What is a distributed database? Fragmentation?
+A.  One logical database spread over several sites. Horizontal fragmentation splits rows, vertical
+    splits columns (each piece keeps the key), and replication stores copies. Two-phase commit keeps
+    commits consistent across sites.
+
+Q63. SQL vs NoSQL?
+A.  SQL: fixed schema, tables, joins, ACID. NoSQL (MongoDB, Cassandra): flexible schema, documents/
+    key-value, scales out easily, often eventual consistency.
+
+Q64. What are MyISAM and InnoDB?
+A.  MySQL storage engines. InnoDB (default from 5.5): transactions, row-level locking, foreign keys,
+    crash recovery. MyISAM (default before 5.5): no transactions, no foreign keys, table-level locks.
+
+Q65. What is AUTO_INCREMENT?
+A.  A MySQL column attribute that generates the next number automatically for each new row
+    (usually the primary key). Oracle uses sequences / IDENTITY columns.
+
+================================================================================================
+END OF FILE. Code and outputs for every experiment: dbms.txt
+================================================================================================
